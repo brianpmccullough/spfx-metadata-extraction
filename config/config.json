@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "spfx-metadata-extraction-command-set": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/spfxMetadataExtraction/SpfxMetadataExtractionCommandSet.js",
+          "manifest": "./src/extensions/spfxMetadataExtraction/SpfxMetadataExtractionCommandSet.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "SpfxMetadataExtractionCommandSetStrings": "lib/extensions/spfxMetadataExtraction/loc/{locale}.js"
+  }
+}

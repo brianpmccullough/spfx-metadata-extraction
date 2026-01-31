@@ -1,0 +1,20 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "useGulp": false,
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.22.0",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "spfx-metadata-extraction",
+    "libraryId": "d2b2d7cd-6dd2-4b32-b0cc-6e36bb9ffed2",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "spfx-metadata-extraction",
+    "solutionShortDescription": "spfx-metadata-extraction description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "extension",
+    "extensionType": "ListViewCommandSet"
+  }
+}
