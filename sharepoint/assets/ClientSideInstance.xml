@@ -3,7 +3,7 @@
     <ClientSideComponentInstance
         Title="SpfxMetadataExtraction"
         Location="ClientSideExtension.ListViewCommandSet.CommandBar"
-        ListTemplateId="100"
+        ListTemplateId="101"
         Properties="{&quot;sampleTextOne&quot;:&quot;One item is selected in the list.&quot;, &quot;sampleTextTwo&quot;:&quot;This command is always visible.&quot;}"
         ComponentId="c2fbb0ac-b2e6-48ff-8b6a-af3065224b39" />
 </Elements>

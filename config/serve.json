@@ -9,8 +9,7 @@
         "c2fbb0ac-b2e6-48ff-8b6a-af3065224b39": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
-            "sampleTextOne": "One item is selected in the list",
-            "sampleTextTwo": "This command is always visible."
+            "allowedFileTypes": [".pdf", ".doc", ".docx"]
           }
         }
       }
@@ -21,8 +20,7 @@
         "c2fbb0ac-b2e6-48ff-8b6a-af3065224b39": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
-            "sampleTextOne": "One item is selected in the list",
-            "sampleTextTwo": "This command is always visible."
+            "allowedFileTypes": [".pdf", ".doc", ".docx"]
           }
         }
       }

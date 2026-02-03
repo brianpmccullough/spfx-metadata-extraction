@@ -5,64 +5,70 @@ import {
   type IListViewCommandSetExecuteEventParameters,
   type ListViewStateChangedEventArgs
 } from '@microsoft/sp-listview-extensibility';
-import { Dialog } from '@microsoft/sp-dialog';
+import { MetadataExtractionContext } from './MetadataExtractionContext';
+import { SharePointRestClient } from '../../clients/SharePointRestClient';
+import { GraphClient } from '../../clients/GraphClient';
+import { MetadataExtractionService } from './MetadataExtractionService';
+import { MetadataDialog } from './MetadataDialog';
 
-/**
- * If your command set uses the ClientSideComponentProperties JSON input,
- * it will be deserialized into the BaseExtension.properties object.
- * You can define an interface to describe it.
- */
 export interface ISpfxMetadataExtractionCommandSetProperties {
-  // This is an example; replace with your own properties
-  sampleTextOne: string;
-  sampleTextTwo: string;
+  allowedFileTypes: string[];
+}
+
+enum Commands {
+  Extract = 'Extract'
 }
 
 const LOG_SOURCE: string = 'SpfxMetadataExtractionCommandSet';
 
 export default class SpfxMetadataExtractionCommandSet extends BaseListViewCommandSet<ISpfxMetadataExtractionCommandSetProperties> {
 
-  public onInit(): Promise<void> {
+  private _metadataExtractionService!: MetadataExtractionService;
+  private _allowedFileTypes!: string[];
+
+  public async onInit(): Promise<void> {
     Log.info(LOG_SOURCE, 'Initialized SpfxMetadataExtractionCommandSet');
 
-    // initial state of the command's visibility
-    const compareOneCommand: Command = this.tryGetCommand('COMMAND_1');
-    compareOneCommand.visible = false;
+    const command: Command = this.tryGetCommand(Commands.Extract);
+    command.visible = false;
 
     this.context.listView.listViewStateChangedEvent.add(this, this._onListViewStateChanged);
 
-    return Promise.resolve();
+    this._allowedFileTypes = this.properties.allowedFileTypes ?? ['.pdf', '.doc', '.docx'];
+    const sharePointRestClient = new SharePointRestClient(this.context.spHttpClient);
+    const msGraphClient = await this.context.msGraphClientFactory.getClient('3');
+    const graphClient = new GraphClient(msGraphClient);
+    this._metadataExtractionService = new MetadataExtractionService(sharePointRestClient, graphClient);
   }
 
   public onExecute(event: IListViewCommandSetExecuteEventParameters): void {
     switch (event.itemId) {
-      case 'COMMAND_1':
-        Dialog.alert(`${this.properties.sampleTextOne}`).catch(() => {
-          /* handle error */
+      case Commands.Extract: {
+        const context = new MetadataExtractionContext(this.context, this._allowedFileTypes);
+        if (!context.canExecute) {
+          return;
+        }
+
+        const dialog = new MetadataDialog(this._metadataExtractionService, context.documentContext!);
+        dialog.show().catch((error) => {
+          Log.error(LOG_SOURCE, error);
         });
         break;
-      case 'COMMAND_2':
-        Dialog.alert(`${this.properties.sampleTextTwo}`).catch(() => {
-          /* handle error */
-        });
-        break;
+      }
       default:
         throw new Error('Unknown command');
     }
   }
 
-  private _onListViewStateChanged = (args: ListViewStateChangedEventArgs): void => {
+  private _onListViewStateChanged = (_args: ListViewStateChangedEventArgs): void => {
     Log.info(LOG_SOURCE, 'List view state changed');
 
-    const compareOneCommand: Command = this.tryGetCommand('COMMAND_1');
-    if (compareOneCommand) {
-      // This command should be hidden unless exactly one row is selected.
-      compareOneCommand.visible = this.context.listView.selectedRows?.length === 1;
+    const command: Command = this.tryGetCommand(Commands.Extract);
+    if (command) {
+      const context = new MetadataExtractionContext(this.context, this._allowedFileTypes);
+      command.visible = context.isVisible;
     }
 
-    // TODO: Add your logic here
-
-    // You should call this.raiseOnChage() to update the command bar
     this.raiseOnChange();
   }
 }
