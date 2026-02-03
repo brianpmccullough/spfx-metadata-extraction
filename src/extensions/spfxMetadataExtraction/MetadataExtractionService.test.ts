@@ -138,69 +138,108 @@ describe('MetadataExtractionService', () => {
         "https://other.sharepoint.com/sites/OtherSite/_api/web/lists(guid'other-list-guid')/contenttypes('0x0120')/fields?$filter=Hidden eq false";
       expect(spoClient.get).toHaveBeenCalledWith(expectedUrl);
     });
+
+    it('filters out fields with internal names starting with underscore', async () => {
+      const spoClient = makeMockSPOClient({
+        value: [
+          { Id: 'f1', InternalName: '_ModerationStatus', Title: 'Moderation Status', TypeAsString: 'Text', Required: false, ReadOnlyField: false, Description: '' },
+          { Id: 'f2', InternalName: 'CustomField', Title: 'Custom Field', TypeAsString: 'Text', Required: false, ReadOnlyField: false, Description: '' },
+          { Id: 'f3', InternalName: '_UIVersionString', Title: 'UI Version', TypeAsString: 'Text', Required: false, ReadOnlyField: false, Description: '' },
+        ],
+      });
+      const service = new MetadataExtractionService(spoClient, makeMockGraphClient());
+
+      const fields = await service.getContentTypeFields(makeMockDocumentContext());
+
+      expect(fields).toHaveLength(1);
+      expect(fields[0].internalName).toBe('CustomField');
+    });
   });
 
   describe('loadFieldMetadata', () => {
-    it('maps Text fields to string type', async () => {
-      const spoClient = makeMockSPOClient({
-        value: [
-          { Id: 'f1', InternalName: 'Notes', Title: 'Notes', TypeAsString: 'Text', Required: false, ReadOnlyField: false, Description: 'Some notes' },
-        ],
-      });
+    it('maps Text fields to string type and includes field value', async () => {
+      const spoClient: ISharePointRestClient = {
+        get: jest.fn()
+          .mockResolvedValueOnce({
+            value: [
+              { Id: 'f1', InternalName: 'Notes', Title: 'Notes', TypeAsString: 'Text', Required: false, ReadOnlyField: false, Description: 'Some notes' },
+            ],
+          })
+          .mockResolvedValueOnce({ Notes: 'Sample note content' }),
+      };
       const service = new MetadataExtractionService(spoClient, makeMockGraphClient());
 
       const result = await service.loadFieldMetadata(makeMockDocumentContext());
 
       expect(result).toEqual([
-        { id: 'f1', title: 'Notes', description: 'Some notes', type: 'string' },
+        { id: 'f1', internalName: 'Notes', title: 'Notes', description: 'Some notes', type: 'string', value: 'Sample note content' },
       ]);
     });
 
     it('maps Number fields to number type', async () => {
-      const spoClient = makeMockSPOClient({
-        value: [
-          { Id: 'f1', InternalName: 'Count', Title: 'Count', TypeAsString: 'Number', Required: false, ReadOnlyField: false, Description: '' },
-        ],
-      });
+      const spoClient: ISharePointRestClient = {
+        get: jest.fn()
+          .mockResolvedValueOnce({
+            value: [
+              { Id: 'f1', InternalName: 'Count', Title: 'Count', TypeAsString: 'Number', Required: false, ReadOnlyField: false, Description: '' },
+            ],
+          })
+          .mockResolvedValueOnce({ Count: 42 }),
+      };
       const service = new MetadataExtractionService(spoClient, makeMockGraphClient());
 
       const result = await service.loadFieldMetadata(makeMockDocumentContext());
 
       expect(result[0].type).toBe('number');
+      expect(result[0].value).toBe(42);
     });
 
     it('maps Currency fields to number type', async () => {
-      const spoClient = makeMockSPOClient({
-        value: [
-          { Id: 'f1', InternalName: 'Price', Title: 'Price', TypeAsString: 'Currency', Required: false, ReadOnlyField: false, Description: '' },
-        ],
-      });
+      const spoClient: ISharePointRestClient = {
+        get: jest.fn()
+          .mockResolvedValueOnce({
+            value: [
+              { Id: 'f1', InternalName: 'Price', Title: 'Price', TypeAsString: 'Currency', Required: false, ReadOnlyField: false, Description: '' },
+            ],
+          })
+          .mockResolvedValueOnce({ Price: 99.99 }),
+      };
       const service = new MetadataExtractionService(spoClient, makeMockGraphClient());
 
       const result = await service.loadFieldMetadata(makeMockDocumentContext());
 
       expect(result[0].type).toBe('number');
+      expect(result[0].value).toBe(99.99);
     });
 
     it('maps Boolean fields to boolean type', async () => {
-      const spoClient = makeMockSPOClient({
-        value: [
-          { Id: 'f1', InternalName: 'Active', Title: 'Active', TypeAsString: 'Boolean', Required: false, ReadOnlyField: false, Description: '' },
-        ],
-      });
+      const spoClient: ISharePointRestClient = {
+        get: jest.fn()
+          .mockResolvedValueOnce({
+            value: [
+              { Id: 'f1', InternalName: 'Active', Title: 'Active', TypeAsString: 'Boolean', Required: false, ReadOnlyField: false, Description: '' },
+            ],
+          })
+          .mockResolvedValueOnce({ Active: true }),
+      };
       const service = new MetadataExtractionService(spoClient, makeMockGraphClient());
 
       const result = await service.loadFieldMetadata(makeMockDocumentContext());
 
       expect(result[0].type).toBe('boolean');
+      expect(result[0].value).toBe(true);
     });
 
     it('defaults unknown field types to string', async () => {
-      const spoClient = makeMockSPOClient({
-        value: [
-          { Id: 'f1', InternalName: 'Custom', Title: 'Custom', TypeAsString: 'Lookup', Required: false, ReadOnlyField: false, Description: '' },
-        ],
-      });
+      const spoClient: ISharePointRestClient = {
+        get: jest.fn()
+          .mockResolvedValueOnce({
+            value: [
+              { Id: 'f1', InternalName: 'Custom', Title: 'Custom', TypeAsString: 'Lookup', Required: false, ReadOnlyField: false, Description: '' },
+            ],
+          })
+          .mockResolvedValueOnce({ Custom: 'lookup value' }),
+      };
       const service = new MetadataExtractionService(spoClient, makeMockGraphClient());
 
       const result = await service.loadFieldMetadata(makeMockDocumentContext());
@@ -215,6 +254,23 @@ describe('MetadataExtractionService', () => {
       const result = await service.loadFieldMetadata(makeMockDocumentContext());
 
       expect(result).toEqual([]);
+    });
+
+    it('sets value to null when field value is undefined', async () => {
+      const spoClient: ISharePointRestClient = {
+        get: jest.fn()
+          .mockResolvedValueOnce({
+            value: [
+              { Id: 'f1', InternalName: 'Notes', Title: 'Notes', TypeAsString: 'Text', Required: false, ReadOnlyField: false, Description: '' },
+            ],
+          })
+          .mockResolvedValueOnce({}),
+      };
+      const service = new MetadataExtractionService(spoClient, makeMockGraphClient());
+
+      const result = await service.loadFieldMetadata(makeMockDocumentContext());
+
+      expect(result[0].value).toBeNull();
     });
   });
 });

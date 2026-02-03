@@ -7,9 +7,11 @@ import type { IFieldMetadata } from '../../../models/IFieldMetadata';
 function makeField(overrides?: Partial<IFieldMetadata>): IFieldMetadata {
   return {
     id: 'field-1',
+    internalName: 'TestField',
     title: 'Test Field',
     description: 'A test description',
     type: 'string',
+    value: 'Test Value',
     ...overrides,
   };
 }
@@ -51,14 +53,14 @@ describe('MetadataRow', () => {
     expect(label!.textContent).toBe('My Field');
   });
 
-  it('renders the description in a text field', () => {
+  it('renders the description in a multiline text field', () => {
     renderComponent(container, {
       field: makeField({ description: 'Current desc' }),
     });
 
-    const input = container.querySelector('input') as HTMLInputElement;
-    expect(input).not.toBeNull();
-    expect(input.value).toBe('Current desc');
+    const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
+    expect(textarea).not.toBeNull();
+    expect(textarea.value).toBe('Current desc');
   });
 
   it('calls onDescriptionChange when the text field value changes', () => {
@@ -68,14 +70,14 @@ describe('MetadataRow', () => {
       onDescriptionChange,
     });
 
-    const input = container.querySelector('input') as HTMLInputElement;
+    const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
     act(() => {
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype,
+      const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
         'value'
       )!.set!;
-      nativeInputValueSetter.call(input, 'new description');
-      input.dispatchEvent(new Event('input', { bubbles: true }));
+      nativeTextAreaValueSetter.call(textarea, 'new description');
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
     expect(onDescriptionChange).toHaveBeenCalledWith('field-abc', 'new description');

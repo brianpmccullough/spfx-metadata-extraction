@@ -88,6 +88,12 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({ loadFields, onDis
       </Stack>
 
       <div style={{ maxHeight: 400, overflowY: 'auto', marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 8, fontWeight: 600, fontSize: 12, color: '#605e5c' }}>
+          <span style={{ width: 140, flexShrink: 0 }}>Field</span>
+          <span style={{ width: 80 }}>Type</span>
+          <span style={{ flex: 1, minWidth: 200 }}>Description</span>
+          <span style={{ width: 180, flexShrink: 0 }}>Current Value</span>
+        </div>
         {editableFields.map(field => (
           <MetadataRow
             key={field.id}

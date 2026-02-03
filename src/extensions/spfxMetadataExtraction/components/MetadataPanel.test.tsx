@@ -6,14 +6,16 @@ import type { IFieldMetadata } from '../../../models/IFieldMetadata';
 
 function makeFields(): IFieldMetadata[] {
   return [
-    { id: 'f1', title: 'Title Field', description: 'desc 1', type: 'string' },
-    { id: 'f2', title: 'Count Field', description: 'desc 2', type: 'number' },
-    { id: 'f3', title: 'Active Field', description: '', type: 'boolean' },
+    { id: 'f1', internalName: 'TitleField', title: 'Title Field', description: 'desc 1', type: 'string', value: 'Sample Title' },
+    { id: 'f2', internalName: 'CountField', title: 'Count Field', description: 'desc 2', type: 'number', value: 42 },
+    { id: 'f3', internalName: 'ActiveField', title: 'Active Field', description: '', type: 'boolean', value: true },
   ];
 }
 
-function flushPromises(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 0));
+async function flushPromises(): Promise<void> {
+  // Multiple microtask flushes to handle chained promises
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 async function renderPanel(
@@ -121,11 +123,11 @@ describe('MetadataPanel', () => {
     expect(onSave).toHaveBeenCalledWith(makeFields());
   });
 
-  it('renders correct number of text inputs for descriptions', async () => {
+  it('renders correct number of textareas for descriptions', async () => {
     await renderPanel(container);
 
-    const inputs = container.querySelectorAll('input');
-    expect(inputs.length).toBeGreaterThanOrEqual(3);
+    const textareas = container.querySelectorAll('textarea');
+    expect(textareas.length).toBeGreaterThanOrEqual(3);
   });
 
   it('shows an error message when loadFields rejects', async () => {
@@ -134,7 +136,7 @@ describe('MetadataPanel', () => {
 
     const messageBar = container.querySelector('.ms-MessageBar');
     expect(messageBar).not.toBeNull();
-    expect(messageBar!.innerHTML).toContain('Network error');
+    expect(messageBar!.textContent).toContain('Network error');
   });
 
   it('shows a Close button on error', async () => {
