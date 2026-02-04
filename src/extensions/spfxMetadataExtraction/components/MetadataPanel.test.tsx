@@ -2,13 +2,14 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { MetadataPanel, IMetadataPanelProps } from './MetadataPanel';
-import type { IFieldMetadata } from '../../../models/IFieldMetadata';
+import { FieldBase, StringField, NumericField, BooleanField } from '../../../models/fields';
+import { MetadataExtractionField } from '../../../models/extraction';
 
-function makeFields(): IFieldMetadata[] {
+function makeFields(): FieldBase[] {
   return [
-    { id: 'f1', internalName: 'TitleField', title: 'Title Field', description: 'desc 1', type: 'string', value: 'Sample Title' },
-    { id: 'f2', internalName: 'CountField', title: 'Count Field', description: 'desc 2', type: 'number', value: 42 },
-    { id: 'f3', internalName: 'ActiveField', title: 'Active Field', description: '', type: 'boolean', value: true },
+    new StringField('f1', 'TitleField', 'Title Field', 'desc 1', false, 'Sample Title'),
+    new NumericField('f2', 'CountField', 'Count Field', 'desc 2', false, 42),
+    new BooleanField('f3', 'ActiveField', 'Active Field', '', false, true),
   ];
 }
 
@@ -108,7 +109,7 @@ describe('MetadataPanel', () => {
     expect(onDismiss).toHaveBeenCalled();
   });
 
-  it('calls onSave with field data when Save is clicked', async () => {
+  it('calls onSave with MetadataExtractionFields when Save is clicked', async () => {
     const onSave = jest.fn();
     await renderPanel(container, { onSave });
 
@@ -120,14 +121,19 @@ describe('MetadataPanel', () => {
       saveButton.click();
     });
 
-    expect(onSave).toHaveBeenCalledWith(makeFields());
+    expect(onSave).toHaveBeenCalledTimes(1);
+    const savedFields = onSave.mock.calls[0][0] as MetadataExtractionField[];
+    expect(savedFields).toHaveLength(3);
+    expect(savedFields[0]).toBeInstanceOf(MetadataExtractionField);
+    expect(savedFields[0].field.title).toBe('Title Field');
   });
 
-  it('renders correct number of textareas for descriptions', async () => {
+  it('renders field values using formatForDisplay', async () => {
     await renderPanel(container);
 
-    const textareas = container.querySelectorAll('textarea');
-    expect(textareas.length).toBeGreaterThanOrEqual(3);
+    expect(container.textContent).toContain('Sample Title');
+    expect(container.textContent).toContain('42');
+    expect(container.textContent).toContain('Yes');
   });
 
   it('shows an error message when loadFields rejects', async () => {
@@ -153,5 +159,37 @@ describe('MetadataPanel', () => {
     });
 
     expect(onDismiss).toHaveBeenCalled();
+  });
+
+  it('renders extraction type dropdown for each field', async () => {
+    await renderPanel(container);
+
+    const dropdowns = container.querySelectorAll('.ms-Dropdown');
+    expect(dropdowns.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('renders description textarea for each field', async () => {
+    await renderPanel(container);
+
+    const textareas = container.querySelectorAll('textarea');
+    expect(textareas.length).toBe(3);
+  });
+
+  it('populates description from field description', async () => {
+    await renderPanel(container);
+
+    const textareas = container.querySelectorAll('textarea');
+    const descriptions = Array.from(textareas).map((t) => t.value);
+    expect(descriptions).toContain('desc 1');
+    expect(descriptions).toContain('desc 2');
+  });
+
+  it('shows a friendly message when there are no fields', async () => {
+    const loadFields = jest.fn().mockResolvedValue([]);
+    await renderPanel(container, { loadFields });
+
+    const messageBar = container.querySelector('.ms-MessageBar');
+    expect(messageBar).not.toBeNull();
+    expect(messageBar!.textContent).toContain('No fields available for metadata extraction');
   });
 });

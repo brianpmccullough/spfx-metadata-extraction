@@ -7,7 +7,6 @@ import {
 } from '@microsoft/sp-listview-extensibility';
 import { MetadataExtractionContext } from './MetadataExtractionContext';
 import { SharePointRestClient } from '../../clients/SharePointRestClient';
-import { GraphClient } from '../../clients/GraphClient';
 import { MetadataExtractionService } from './MetadataExtractionService';
 import { MetadataDialog } from './MetadataDialog';
 
@@ -36,9 +35,7 @@ export default class SpfxMetadataExtractionCommandSet extends BaseListViewComman
 
     this._allowedFileTypes = this.properties.allowedFileTypes ?? ['.pdf', '.doc', '.docx'];
     const sharePointRestClient = new SharePointRestClient(this.context.spHttpClient);
-    const msGraphClient = await this.context.msGraphClientFactory.getClient('3');
-    const graphClient = new GraphClient(msGraphClient);
-    this._metadataExtractionService = new MetadataExtractionService(sharePointRestClient, graphClient);
+    this._metadataExtractionService = new MetadataExtractionService(sharePointRestClient);
   }
 
   public onExecute(event: IListViewCommandSetExecuteEventParameters): void {

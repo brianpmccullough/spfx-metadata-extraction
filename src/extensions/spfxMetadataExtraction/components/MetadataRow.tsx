@@ -1,63 +1,65 @@
 import * as React from 'react';
-import { Dropdown, IDropdownOption, Label, Text, TextField } from '@fluentui/react';
-import { FIELD_TYPES, type FieldType, type IFieldMetadata } from '../../../models/IFieldMetadata';
+import { Dropdown, Label, Text, TextField, IDropdownOption } from '@fluentui/react';
+import {
+  MetadataExtractionField,
+  MetadataExtractionFieldType,
+} from '../../../models/extraction';
 
 export interface IMetadataRowProps {
-  field: IFieldMetadata;
-  onDescriptionChange: (id: string, description: string) => void;
-  onTypeChange: (id: string, type: FieldType) => void;
+  extractionField: MetadataExtractionField;
+  onExtractionTypeChange: (newType: MetadataExtractionFieldType) => void;
+  onDescriptionChange: (newDescription: string) => void;
 }
 
-const typeOptions: IDropdownOption[] = FIELD_TYPES.map((t) => ({ key: t, text: t }));
+const extractionTypeOptions: IDropdownOption[] = [
+  { key: MetadataExtractionFieldType.String, text: MetadataExtractionFieldType.String },
+  { key: MetadataExtractionFieldType.Number, text: MetadataExtractionFieldType.Number },
+  { key: MetadataExtractionFieldType.Boolean, text: MetadataExtractionFieldType.Boolean },
+];
 
-export const MetadataRow: React.FC<IMetadataRowProps> = ({ field, onDescriptionChange, onTypeChange }) => {
-  const handleDescriptionChange = React.useCallback(
-    (_event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string): void => {
-      onDescriptionChange(field.id, newValue ?? '');
-    },
-    [field.id, onDescriptionChange]
-  );
+export const MetadataRow: React.FC<IMetadataRowProps> = ({
+  extractionField,
+  onExtractionTypeChange,
+  onDescriptionChange,
+}) => {
+  const { field } = extractionField;
 
   const handleTypeChange = React.useCallback(
     (_event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void => {
       if (option) {
-        onTypeChange(field.id, option.key as FieldType);
+        onExtractionTypeChange(option.key as MetadataExtractionFieldType);
       }
     },
-    [field.id, onTypeChange]
+    [onExtractionTypeChange]
   );
 
-  const formatValue = (value: string | number | boolean | null): string => {
-    if (value === null || value === undefined) {
-      return '(empty)';
-    }
-    if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
-    }
-    return String(value);
-  };
+  const handleDescriptionChange = React.useCallback(
+    (_event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string): void => {
+      onDescriptionChange(newValue ?? '');
+    },
+    [onDescriptionChange]
+  );
 
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
-      <Label style={{ width: 140, flexShrink: 0, paddingTop: 6 }}>{field.title}</Label>
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid #edebe9' }}>
+      <Label style={{ width: 120, flexShrink: 0, paddingTop: 6 }}>{field.title}</Label>
       <Dropdown
-        style={{ width: 80 }}
-        selectedKey={field.type}
-        options={typeOptions}
+        selectedKey={extractionField.extractionType}
+        options={extractionTypeOptions}
         onChange={handleTypeChange}
+        styles={{ root: { width: 100, flexShrink: 0 } }}
       />
       <TextField
-        style={{ flex: 1, minWidth: 200 }}
-        value={field.description}
+        value={extractionField.description}
         onChange={handleDescriptionChange}
-        placeholder="Enter description"
         multiline
         rows={2}
-        resizable={false}
+        styles={{ root: { flex: 1, minWidth: 200 } }}
+        placeholder="Description for LLM"
       />
       <Text
         style={{
-          width: 180,
+          width: 150,
           flexShrink: 0,
           padding: '6px 0',
           color: field.value === null ? '#888' : undefined,
@@ -66,7 +68,7 @@ export const MetadataRow: React.FC<IMetadataRowProps> = ({ field, onDescriptionC
           whiteSpace: 'nowrap',
         }}
       >
-        {formatValue(field.value)}
+        {field.formatForDisplay()}
       </Text>
     </div>
   );

@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { BaseDialog } from '@microsoft/sp-dialog';
-import type { IFieldMetadata } from '../../models/IFieldMetadata';
+import type { FieldBase } from '../../models/fields';
+import type { MetadataExtractionField } from '../../models/extraction';
 import type { IDocumentContext } from '../../models/IDocumentContext';
 import type { IMetadataExtractionService } from './IMetadataExtractionService';
 import { MetadataPanel } from './components/MetadataPanel';
@@ -15,12 +16,12 @@ export class MetadataDialog extends BaseDialog {
   }
 
   protected render(): void {
-    const loadFields = (): Promise<IFieldMetadata[]> =>
-      this._service.loadFieldMetadata(this._documentContext);
+    const loadFields = (): Promise<FieldBase[]> =>
+      this._service.loadFields(this._documentContext);
 
-    const handleSave = (fields: IFieldMetadata[]): void => {
-      // TODO: call this._service.saveFieldMetadata(this._documentContext, fields)
-      console.log('Saved field metadata:', fields);
+    const handleSave = (extractionFields: MetadataExtractionField[]): void => {
+      // TODO: call LLM extraction service with extractionFields
+      console.log('Saved extraction fields:', extractionFields);
       this.close().catch(() => { /* close error */ });
     };
 

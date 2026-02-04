@@ -9,17 +9,21 @@ import {
   SpinnerSize,
   Stack,
 } from '@fluentui/react';
-import type { FieldType, IFieldMetadata } from '../../../models/IFieldMetadata';
+import type { FieldBase } from '../../../models/fields';
+import {
+  MetadataExtractionField,
+  MetadataExtractionFieldType,
+} from '../../../models/extraction';
 import { MetadataRow } from './MetadataRow';
 
 export interface IMetadataPanelProps {
-  loadFields: () => Promise<IFieldMetadata[]>;
+  loadFields: () => Promise<FieldBase[]>;
   onDismiss: () => void;
-  onSave: (fields: IFieldMetadata[]) => void;
+  onSave: (extractionFields: MetadataExtractionField[]) => void;
 }
 
 export const MetadataPanel: React.FC<IMetadataPanelProps> = ({ loadFields, onDismiss, onSave }) => {
-  const [editableFields, setEditableFields] = React.useState<IFieldMetadata[]>([]);
+  const [extractionFields, setExtractionFields] = React.useState<MetadataExtractionField[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string>();
 
@@ -29,9 +33,10 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({ loadFields, onDis
     setError(undefined);
 
     loadFields()
-      .then((fields) => {
+      .then((loadedFields) => {
         if (!cancelled) {
-          setEditableFields(fields);
+          const wrapped = loadedFields.map((f) => new MetadataExtractionField(f));
+          setExtractionFields(wrapped);
           setIsLoading(false);
         }
       })
@@ -45,17 +50,31 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({ loadFields, onDis
     return () => { cancelled = true; };
   }, [loadFields]);
 
-  const handleDescriptionChange = React.useCallback((id: string, description: string): void => {
-    setEditableFields(prev => prev.map(f => f.id === id ? { ...f, description } : f));
-  }, []);
+  const handleExtractionTypeChange = React.useCallback(
+    (index: number, newType: MetadataExtractionFieldType): void => {
+      setExtractionFields((prev) => {
+        const updated = [...prev];
+        updated[index].extractionType = newType;
+        return updated;
+      });
+    },
+    []
+  );
 
-  const handleTypeChange = React.useCallback((id: string, type: FieldType): void => {
-    setEditableFields(prev => prev.map(f => f.id === id ? { ...f, type } : f));
-  }, []);
+  const handleDescriptionChange = React.useCallback(
+    (index: number, newDescription: string): void => {
+      setExtractionFields((prev) => {
+        const updated = [...prev];
+        updated[index].description = newDescription;
+        return updated;
+      });
+    },
+    []
+  );
 
   const handleSave = React.useCallback((): void => {
-    onSave(editableFields);
-  }, [editableFields, onSave]);
+    onSave(extractionFields);
+  }, [extractionFields, onSave]);
 
   if (isLoading) {
     return (
@@ -77,7 +96,7 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({ loadFields, onDis
   }
 
   return (
-    <Stack style={{ padding: 24, maxWidth: 720 }}>
+    <Stack style={{ padding: 24, maxWidth: 800 }}>
       <Stack horizontal horizontalAlign="space-between" verticalAlign="center" style={{ marginBottom: 16 }}>
         <h2 style={{ margin: 0 }}>Field Metadata</h2>
         <IconButton
@@ -87,21 +106,29 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({ loadFields, onDis
         />
       </Stack>
 
-      <div style={{ maxHeight: 400, overflowY: 'auto', marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 8, fontWeight: 600, fontSize: 12, color: '#605e5c' }}>
-          <span style={{ width: 140, flexShrink: 0 }}>Field</span>
-          <span style={{ width: 80 }}>Type</span>
-          <span style={{ flex: 1, minWidth: 200 }}>Description</span>
-          <span style={{ width: 180, flexShrink: 0 }}>Current Value</span>
-        </div>
-        {editableFields.map(field => (
-          <MetadataRow
-            key={field.id}
-            field={field}
-            onDescriptionChange={handleDescriptionChange}
-            onTypeChange={handleTypeChange}
-          />
-        ))}
+      <div style={{ maxHeight: 500, overflowY: 'auto', marginBottom: 16 }}>
+        {extractionFields.length === 0 ? (
+          <MessageBar messageBarType={MessageBarType.info}>
+            No fields available for metadata extraction.
+          </MessageBar>
+        ) : (
+          <>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 8, fontWeight: 600, fontSize: 12, color: '#605e5c' }}>
+              <span style={{ width: 120, flexShrink: 0 }}>Field</span>
+              <span style={{ width: 100, flexShrink: 0 }}>Type</span>
+              <span style={{ flex: 1, minWidth: 200 }}>Description</span>
+              <span style={{ width: 150, flexShrink: 0 }}>Current Value</span>
+            </div>
+            {extractionFields.map((extractionField, index) => (
+              <MetadataRow
+                key={extractionField.field.id}
+                extractionField={extractionField}
+                onExtractionTypeChange={(newType) => handleExtractionTypeChange(index, newType)}
+                onDescriptionChange={(newDesc) => handleDescriptionChange(index, newDesc)}
+              />
+            ))}
+          </>
+        )}
       </div>
 
       <Stack horizontal horizontalAlign="end" tokens={{ childrenGap: 8 }}>

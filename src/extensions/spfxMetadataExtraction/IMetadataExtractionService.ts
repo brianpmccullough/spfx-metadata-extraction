@@ -1,6 +1,6 @@
 import type { IDocumentContext } from '../../models/IDocumentContext';
-import type { IFieldMetadata } from '../../models/IFieldMetadata';
+import type { FieldBase } from '../../models/fields';
 
 export interface IMetadataExtractionService {
-  loadFieldMetadata(documentContext: IDocumentContext): Promise<IFieldMetadata[]>;
+  loadFields(documentContext: IDocumentContext): Promise<FieldBase[]>;
 }

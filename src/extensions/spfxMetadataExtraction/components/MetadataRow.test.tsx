@@ -2,33 +2,15 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { MetadataRow, IMetadataRowProps } from './MetadataRow';
-import type { IFieldMetadata } from '../../../models/IFieldMetadata';
-
-function makeField(overrides?: Partial<IFieldMetadata>): IFieldMetadata {
-  return {
-    id: 'field-1',
-    internalName: 'TestField',
-    title: 'Test Field',
-    description: 'A test description',
-    type: 'string',
-    value: 'Test Value',
-    ...overrides,
-  };
-}
+import { StringField, BooleanField, NumericField } from '../../../models/fields';
+import { MetadataExtractionField, MetadataExtractionFieldType } from '../../../models/extraction';
 
 function renderComponent(
   container: HTMLDivElement,
-  props: Partial<IMetadataRowProps> = {}
+  props: IMetadataRowProps
 ): void {
-  const defaultProps: IMetadataRowProps = {
-    field: makeField(),
-    onDescriptionChange: jest.fn(),
-    onTypeChange: jest.fn(),
-    ...props,
-  };
-
   act(() => {
-    ReactDOM.render(<MetadataRow {...defaultProps} />, container);
+    ReactDOM.render(<MetadataRow {...props} />, container);
   });
 }
 
@@ -46,57 +28,131 @@ describe('MetadataRow', () => {
   });
 
   it('renders the field title as a label', () => {
-    renderComponent(container, { field: makeField({ title: 'My Field' }) });
+    const field = new StringField('id', 'TestField', 'My Field', '', false, 'test');
+    const extractionField = new MetadataExtractionField(field);
+    renderComponent(container, {
+      extractionField,
+      onExtractionTypeChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+    });
 
     const label = container.querySelector('.ms-Label');
     expect(label).not.toBeNull();
     expect(label!.textContent).toBe('My Field');
   });
 
-  it('renders the description in a multiline text field', () => {
+  it('renders field value using formatForDisplay', () => {
+    const field = new StringField('id', 'Notes', 'Notes', '', false, 'Hello World');
+    const extractionField = new MetadataExtractionField(field);
     renderComponent(container, {
-      field: makeField({ description: 'Current desc' }),
+      extractionField,
+      onExtractionTypeChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
     });
 
-    const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
-    expect(textarea).not.toBeNull();
-    expect(textarea.value).toBe('Current desc');
+    expect(container.textContent).toContain('Hello World');
   });
 
-  it('calls onDescriptionChange when the text field value changes', () => {
+  it('renders (empty) for null value', () => {
+    const field = new StringField('id', 'Notes', 'Notes', '', false, null);
+    const extractionField = new MetadataExtractionField(field);
+    renderComponent(container, {
+      extractionField,
+      onExtractionTypeChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+    });
+
+    expect(container.textContent).toContain('(empty)');
+  });
+
+  it('renders Yes for true boolean value', () => {
+    const field = new BooleanField('id', 'Active', 'Active', '', false, true);
+    const extractionField = new MetadataExtractionField(field);
+    renderComponent(container, {
+      extractionField,
+      onExtractionTypeChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+    });
+
+    expect(container.textContent).toContain('Yes');
+  });
+
+  it('renders No for false boolean value', () => {
+    const field = new BooleanField('id', 'Active', 'Active', '', false, false);
+    const extractionField = new MetadataExtractionField(field);
+    renderComponent(container, {
+      extractionField,
+      onExtractionTypeChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+    });
+
+    expect(container.textContent).toContain('No');
+  });
+
+  it('renders a dropdown for extraction type', () => {
+    const field = new StringField('id', 'Notes', 'Notes', '', false, 'test');
+    const extractionField = new MetadataExtractionField(field);
+    renderComponent(container, {
+      extractionField,
+      onExtractionTypeChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+    });
+
+    const dropdown = container.querySelector('.ms-Dropdown');
+    expect(dropdown).not.toBeNull();
+  });
+
+  it('renders a multiline text field for description', () => {
+    const field = new StringField('id', 'Notes', 'Notes', 'Field description', false, 'test');
+    const extractionField = new MetadataExtractionField(field);
+    renderComponent(container, {
+      extractionField,
+      onExtractionTypeChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+    });
+
+    const textarea = container.querySelector('textarea');
+    expect(textarea).not.toBeNull();
+    expect(textarea!.value).toBe('Field description');
+  });
+
+  it('calls onDescriptionChange when description is edited', () => {
+    const field = new StringField('id', 'Notes', 'Notes', '', false, 'test');
+    const extractionField = new MetadataExtractionField(field);
     const onDescriptionChange = jest.fn();
     renderComponent(container, {
-      field: makeField({ id: 'field-abc' }),
+      extractionField,
+      onExtractionTypeChange: jest.fn(),
       onDescriptionChange,
     });
 
     const textarea = container.querySelector('textarea') as HTMLTextAreaElement;
     act(() => {
-      const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLTextAreaElement.prototype,
-        'value'
-      )!.set!;
-      nativeTextAreaValueSetter.call(textarea, 'new description');
+      textarea.value = 'New description';
       textarea.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
-    expect(onDescriptionChange).toHaveBeenCalledWith('field-abc', 'new description');
+    expect(onDescriptionChange).toHaveBeenCalledWith('New description');
   });
 
-  it('renders a dropdown with the current type selected', () => {
-    renderComponent(container, {
-      field: makeField({ type: 'number' }),
-    });
+  it('infers extraction type as Number for NumericField', () => {
+    const field = new NumericField('id', 'Count', 'Count', '', false, 42);
+    const extractionField = new MetadataExtractionField(field);
 
-    const dropdownTitle = container.querySelector('.ms-Dropdown-title');
-    expect(dropdownTitle).not.toBeNull();
-    expect(dropdownTitle!.textContent).toBe('number');
+    expect(extractionField.extractionType).toBe(MetadataExtractionFieldType.Number);
   });
 
-  it('renders all three type options in the dropdown', () => {
-    renderComponent(container);
+  it('infers extraction type as Boolean for BooleanField', () => {
+    const field = new BooleanField('id', 'Active', 'Active', '', false, true);
+    const extractionField = new MetadataExtractionField(field);
 
-    const dropdownOption = container.querySelector('.ms-Dropdown');
-    expect(dropdownOption).not.toBeNull();
+    expect(extractionField.extractionType).toBe(MetadataExtractionFieldType.Boolean);
+  });
+
+  it('infers extraction type as String for StringField', () => {
+    const field = new StringField('id', 'Notes', 'Notes', '', false, 'test');
+    const extractionField = new MetadataExtractionField(field);
+
+    expect(extractionField.extractionType).toBe(MetadataExtractionFieldType.String);
   });
 });
