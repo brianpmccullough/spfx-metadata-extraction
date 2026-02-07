@@ -20,6 +20,11 @@
       "title": { "default": "Extract Metadata" },
       "iconImageUrl": "icons/request.png",
       "type": "command"
+    },
+    "ExtractText": {
+      "title": { "default": "Extract Text" },
+      "iconImageUrl": "icons/request.png",
+      "type": "command"
     }
   }
 }

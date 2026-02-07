@@ -5,12 +5,14 @@ import type { FieldBase } from '../../models/fields';
 import type { MetadataExtractionField } from '../../models/extraction';
 import type { IDocumentContext } from '../../models/IDocumentContext';
 import type { IMetadataExtractionService } from './IMetadataExtractionService';
+import type { ILlmExtractionService } from '../../services';
 import { MetadataPanel } from './components/MetadataPanel';
 
 export class MetadataDialog extends BaseDialog {
   constructor(
     private readonly _service: IMetadataExtractionService,
-    private readonly _documentContext: IDocumentContext
+    private readonly _documentContext: IDocumentContext,
+    private readonly _llmService: ILlmExtractionService
   ) {
     super();
   }
@@ -20,14 +22,19 @@ export class MetadataDialog extends BaseDialog {
       this._service.loadFields(this._documentContext);
 
     const handleSave = (extractionFields: MetadataExtractionField[]): void => {
-      // TODO: call LLM extraction service with extractionFields
-      console.log('Saved extraction fields:', extractionFields);
-      this.close().catch(() => { /* close error */ });
+      // Log extracted values for debugging (don't close dialog - user can review and close)
+      console.log('Extraction complete:', extractionFields.map((ef) => ({
+        field: ef.field.title,
+        extractedValue: ef.extractedValue,
+        currentValue: ef.field.formatForDisplay(),
+      })));
     };
 
     ReactDOM.render(
       <MetadataPanel
         loadFields={loadFields}
+        documentContext={this._documentContext}
+        llmService={this._llmService}
         onDismiss={() => this.close()}
         onSave={handleSave}
       />,

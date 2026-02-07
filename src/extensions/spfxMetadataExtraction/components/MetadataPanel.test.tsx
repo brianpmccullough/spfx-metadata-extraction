@@ -3,7 +3,8 @@ import * as ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { MetadataPanel, IMetadataPanelProps } from './MetadataPanel';
 import { FieldBase, StringField, NumericField, BooleanField } from '../../../models/fields';
-import { MetadataExtractionField } from '../../../models/extraction';
+import type { IDocumentContext } from '../../../models/IDocumentContext';
+import type { ILlmExtractionService, IExtractionResponse } from '../../../services';
 
 function makeFields(): FieldBase[] {
   return [
@@ -11,6 +12,45 @@ function makeFields(): FieldBase[] {
     new NumericField('f2', 'CountField', 'Count Field', 'desc 2', false, 42),
     new BooleanField('f3', 'ActiveField', 'Active Field', '', false, true),
   ];
+}
+
+function makeMockDocumentContext(): IDocumentContext {
+  return {
+    contentTypeId: '0x0101',
+    fileExtension: 'docx',
+    fileName: 'test-document.docx',
+    fileLeafRef: 'test-document.docx',
+    fileRef: '/sites/test/Documents/test-document.docx',
+    fileSize: 1024,
+    fileSizeInBytes: 1024,
+    fileSizeInKiloBytes: 1,
+    fileSizeInMegaBytes: 0.001,
+    fileType: 'docx',
+    serverRelativeUrl: '/sites/test/Documents/test-document.docx',
+    itemId: 1,
+    uniqueId: 'guid-1234',
+    driveId: 'drive-id-1',
+    driveItemId: 'item-id-1',
+    spItemUrl: 'https://tenant.sharepoint.com/sites/test/_api/items/1',
+    siteUrl: 'https://tenant.sharepoint.com/sites/test',
+    webUrl: 'https://tenant.sharepoint.com/sites/test',
+    siteId: 'site-guid',
+    webId: 'web-guid',
+    listId: 'list-guid',
+  };
+}
+
+function makeMockLlmService(): ILlmExtractionService {
+  return {
+    extract: jest.fn().mockResolvedValue({
+      document: { driveId: 'drive-id-1', driveItemId: 'item-id-1' },
+      results: [
+        { fieldName: 'Title Field', confidence: 'green', value: 'Extracted Title' },
+        { fieldName: 'Count Field', confidence: 'green', value: 100 },
+        { fieldName: 'Active Field', confidence: 'yellow', value: true },
+      ],
+    } as IExtractionResponse),
+  };
 }
 
 async function flushPromises(): Promise<void> {
@@ -25,6 +65,8 @@ async function renderPanel(
 ): Promise<void> {
   const defaultProps: IMetadataPanelProps = {
     loadFields: jest.fn().mockResolvedValue(makeFields()),
+    documentContext: makeMockDocumentContext(),
+    llmService: makeMockLlmService(),
     onDismiss: jest.fn(),
     onSave: jest.fn(),
     ...props,
@@ -56,6 +98,8 @@ describe('MetadataPanel', () => {
       ReactDOM.render(
         <MetadataPanel
           loadFields={() => new Promise(() => { /* never resolves */ })}
+          documentContext={makeMockDocumentContext()}
+          llmService={makeMockLlmService()}
           onDismiss={jest.fn()}
           onSave={jest.fn()}
         />,
@@ -85,12 +129,12 @@ describe('MetadataPanel', () => {
     expect(labelTexts).toContain('Active Field');
   });
 
-  it('renders Save and Cancel buttons', async () => {
+  it('renders Extract and Cancel buttons', async () => {
     await renderPanel(container);
 
     const buttons = container.querySelectorAll('.ms-Button');
     const buttonTexts = Array.from(buttons).map((b) => b.textContent);
-    expect(buttonTexts).toContain('Save');
+    expect(buttonTexts).toContain('Extract');
     expect(buttonTexts).toContain('Cancel');
   });
 
@@ -109,23 +153,20 @@ describe('MetadataPanel', () => {
     expect(onDismiss).toHaveBeenCalled();
   });
 
-  it('calls onSave with MetadataExtractionFields when Save is clicked', async () => {
-    const onSave = jest.fn();
-    await renderPanel(container, { onSave });
+  it('calls llmService.extract when Extract is clicked', async () => {
+    const llmService = makeMockLlmService();
+    await renderPanel(container, { llmService });
 
     const buttons = Array.from(container.querySelectorAll('.ms-Button'));
-    const saveButton = buttons.find((b) => b.textContent === 'Save') as HTMLElement;
-    expect(saveButton).toBeDefined();
+    const extractButton = buttons.find((b) => b.textContent === 'Extract') as HTMLElement;
+    expect(extractButton).toBeDefined();
 
-    act(() => {
-      saveButton.click();
+    await act(async () => {
+      extractButton.click();
+      await flushPromises();
     });
 
-    expect(onSave).toHaveBeenCalledTimes(1);
-    const savedFields = onSave.mock.calls[0][0] as MetadataExtractionField[];
-    expect(savedFields).toHaveLength(3);
-    expect(savedFields[0]).toBeInstanceOf(MetadataExtractionField);
-    expect(savedFields[0].field.title).toBe('Title Field');
+    expect(llmService.extract).toHaveBeenCalledTimes(1);
   });
 
   it('renders field values using formatForDisplay', async () => {
@@ -180,8 +221,8 @@ describe('MetadataPanel', () => {
 
     const textareas = container.querySelectorAll('textarea');
     const descriptions = Array.from(textareas).map((t) => t.value);
-    expect(descriptions).toContain('desc 1');
-    expect(descriptions).toContain('desc 2');
+    expect(descriptions.some((d) => d.includes('desc 1'))).toBe(true);
+    expect(descriptions.some((d) => d.includes('desc 2'))).toBe(true);
   });
 
   it('shows a friendly message when there are no fields', async () => {

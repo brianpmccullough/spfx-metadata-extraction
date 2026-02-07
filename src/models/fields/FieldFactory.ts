@@ -19,8 +19,8 @@ export interface ISharePointFieldSchema {
   TypeAsString: string;
   Required: boolean;
   ReadOnlyField: boolean;
-  // Choice fields
-  Choices?: { results: string[] };
+  // Choice fields (OData verbose: { results: string[] }, nometadata: string[])
+  Choices?: { results: string[] } | string[];
   // DateTime fields (0 = DateOnly, 1 = DateTime)
   DisplayFormat?: number;
   // Taxonomy fields
@@ -78,7 +78,7 @@ export class FieldFactory implements IFieldFactory {
           baseArgs.description,
           baseArgs.isRequired,
           value as string | null,
-          schema.Choices?.results ?? []
+          this.parseChoices(schema.Choices)
         );
 
       case 'MultiChoice':
@@ -89,7 +89,7 @@ export class FieldFactory implements IFieldFactory {
           baseArgs.description,
           baseArgs.isRequired,
           this.parseMultiChoiceValue(value),
-          schema.Choices?.results ?? []
+          this.parseChoices(schema.Choices)
         );
 
       case 'TaxonomyFieldType':
@@ -205,6 +205,17 @@ export class FieldFactory implements IFieldFactory {
       sspId,
       terms
     );
+  }
+
+  private parseChoices(choices: ISharePointFieldSchema['Choices']): string[] {
+    if (!choices) {
+      return [];
+    }
+    // OData nometadata returns string[], verbose returns { results: string[] }
+    if (Array.isArray(choices)) {
+      return choices;
+    }
+    return choices.results ?? [];
   }
 
   private parseMultiChoiceValue(value: unknown): string[] | null {
