@@ -7,10 +7,16 @@ import { MetadataExtractionField, MetadataExtractionFieldType } from '../../../m
 
 function renderComponent(
   container: HTMLDivElement,
-  props: IMetadataRowProps
+  props: Omit<IMetadataRowProps, 'applyChecked' | 'onApplyCheckedChange' | 'isApplyEnabled'> & Partial<Pick<IMetadataRowProps, 'applyChecked' | 'onApplyCheckedChange' | 'isApplyEnabled'>>
 ): void {
+  const fullProps: IMetadataRowProps = {
+    applyChecked: false,
+    onApplyCheckedChange: jest.fn(),
+    isApplyEnabled: false,
+    ...props,
+  };
   act(() => {
-    ReactDOM.render(<MetadataRow {...props} />, container);
+    ReactDOM.render(<MetadataRow {...fullProps} />, container);
   });
 }
 

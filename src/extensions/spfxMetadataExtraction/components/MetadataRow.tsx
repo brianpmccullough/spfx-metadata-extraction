@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dropdown, Label, Text, TextField, IDropdownOption } from '@fluentui/react';
+import { Checkbox, Dropdown, Label, Text, TextField, IDropdownOption } from '@fluentui/react';
 import {
   MetadataExtractionField,
   MetadataExtractionFieldType,
@@ -9,6 +9,9 @@ export interface IMetadataRowProps {
   extractionField: MetadataExtractionField;
   onExtractionTypeChange: (newType: MetadataExtractionFieldType) => void;
   onDescriptionChange: (newDescription: string) => void;
+  applyChecked: boolean;
+  onApplyCheckedChange: (checked: boolean) => void;
+  isApplyEnabled: boolean;
 }
 
 const confidenceStyles: Record<string, { background: string; text: string }> = {
@@ -28,6 +31,9 @@ export const MetadataRow: React.FC<IMetadataRowProps> = ({
   extractionField,
   onExtractionTypeChange,
   onDescriptionChange,
+  applyChecked,
+  onApplyCheckedChange,
+  isApplyEnabled,
 }) => {
   const { field } = extractionField;
 
@@ -45,6 +51,13 @@ export const MetadataRow: React.FC<IMetadataRowProps> = ({
       onDescriptionChange(newValue ?? '');
     },
     [onDescriptionChange]
+  );
+
+  const handleApplyCheckedChange = React.useCallback(
+    (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean): void => {
+      onApplyCheckedChange(!!checked);
+    },
+    [onApplyCheckedChange]
   );
 
   return (
@@ -96,6 +109,13 @@ export const MetadataRow: React.FC<IMetadataRowProps> = ({
       >
         {extractionField.extractedValue !== null ? String(extractionField.extractedValue) : '(not extracted)'}
       </Text>
+      <div style={{ width: 60, flexShrink: 0, display: 'flex', justifyContent: 'center', paddingTop: 6 }}>
+        <Checkbox
+          checked={applyChecked}
+          onChange={handleApplyCheckedChange}
+          disabled={!isApplyEnabled}
+        />
+      </div>
     </div>
   );
 };

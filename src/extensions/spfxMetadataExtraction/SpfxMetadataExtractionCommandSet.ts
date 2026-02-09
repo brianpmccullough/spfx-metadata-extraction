@@ -30,6 +30,7 @@ export default class SpfxMetadataExtractionCommandSet extends BaseListViewComman
   private _metadataExtractionService!: MetadataExtractionService;
   private _textExtractionService!: TextExtractionService;
   private _llmExtractionService!: ILlmExtractionService;
+  private _sharePointRestClient!: SharePointRestClient;
   private _allowedFileTypes!: string[];
 
   public async onInit(): Promise<void> {
@@ -44,8 +45,8 @@ export default class SpfxMetadataExtractionCommandSet extends BaseListViewComman
     this.context.listView.listViewStateChangedEvent.add(this, this._onListViewStateChanged);
 
     this._allowedFileTypes = this.properties.allowedFileTypes ?? ['.pdf', '.doc', '.docx'];
-    const sharePointRestClient = new SharePointRestClient(this.context.spHttpClient);
-    this._metadataExtractionService = new MetadataExtractionService(sharePointRestClient);
+    this._sharePointRestClient = new SharePointRestClient(this.context.spHttpClient);
+    this._metadataExtractionService = new MetadataExtractionService(this._sharePointRestClient);
 
     // Create AAD HTTP client for extraction APIs with Entra ID authentication
     const aadHttpClient = await this.context.aadHttpClientFactory.getClient('d93c7720-43a9-4924-99c5-68464eb75b20');
@@ -62,7 +63,7 @@ export default class SpfxMetadataExtractionCommandSet extends BaseListViewComman
           return;
         }
 
-        const dialog = new MetadataDialog(this._metadataExtractionService, context.documentContext!, this._llmExtractionService);
+        const dialog = new MetadataDialog(this._metadataExtractionService, context.documentContext!, this._llmExtractionService, this._sharePointRestClient);
         dialog.show().catch((error) => {
           Log.error(LOG_SOURCE, error);
         });

@@ -25,6 +25,7 @@ export interface IMetadataPanelProps {
   llmService: ILlmExtractionService;
   onDismiss: () => void;
   onSave: (extractionFields: MetadataExtractionField[]) => void;
+  onApply: (fields: Array<{ internalName: string; value: string | number | boolean | null }>) => Promise<void>;
 }
 
 export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
@@ -33,10 +34,14 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
   llmService,
   onDismiss,
   onSave,
+  onApply,
 }) => {
   const [extractionFields, setExtractionFields] = React.useState<MetadataExtractionField[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isExtracting, setIsExtracting] = React.useState(false);
+  const [isApplying, setIsApplying] = React.useState(false);
+  const [hasExtracted, setHasExtracted] = React.useState(false);
+  const [applyChecked, setApplyChecked] = React.useState<Set<string>>(new Set());
   const [error, setError] = React.useState<string>();
 
   React.useEffect(() => {
@@ -87,6 +92,16 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
   const handleExtract = React.useCallback(async (): Promise<void> => {
     setIsExtracting(true);
     setError(undefined);
+    setApplyChecked(new Set());
+
+    // Clear previous extraction results
+    setExtractionFields((prev) =>
+      prev.map((ef) => {
+        ef.extractedValue = null;
+        ef.confidence = null;
+        return ef;
+      })
+    );
 
     try {
       // Build schema from extraction fields
@@ -107,15 +122,62 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
           }
           return ef;
         });
+
+        // Auto-check green confidence fields
+        const autoChecked = new Set<string>();
+        for (const ef of updated) {
+          if (ef.confidence === 'green') {
+            autoChecked.add(ef.field.id);
+          }
+        }
+        setApplyChecked(autoChecked);
+
         onSave(updated);
         return updated;
       });
+
+      setHasExtracted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Extraction failed');
     } finally {
       setIsExtracting(false);
     }
   }, [extractionFields, documentContext, llmService, onSave]);
+
+  const handleApplyCheckedChange = React.useCallback(
+    (fieldId: string, checked: boolean): void => {
+      setApplyChecked((prev) => {
+        const next = new Set(prev);
+        if (checked) {
+          next.add(fieldId);
+        } else {
+          next.delete(fieldId);
+        }
+        return next;
+      });
+    },
+    []
+  );
+
+  const handleApply = React.useCallback(async (): Promise<void> => {
+    setIsApplying(true);
+    setError(undefined);
+
+    try {
+      const fieldsToApply = extractionFields
+        .filter((ef) => applyChecked.has(ef.field.id))
+        .map((ef) => ({
+          internalName: ef.field.internalName,
+          value: ef.extractedValue,
+        }));
+
+      await onApply(fieldsToApply);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Apply failed');
+    } finally {
+      setIsApplying(false);
+    }
+  }, [extractionFields, applyChecked, onApply]);
 
   if (isLoading) {
     return (
@@ -172,6 +234,7 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
               <span style={{ flex: 1, minWidth: 150 }}>Description</span>
               <span style={{ width: 120, flexShrink: 0 }}>Current Value</span>
               <span style={{ width: 150, flexShrink: 0 }}>Extracted Value</span>
+              <span style={{ width: 60, flexShrink: 0, textAlign: 'center' }}>Apply</span>
             </div>
             {extractionFields.map((extractionField, index) => (
               <MetadataRow
@@ -179,6 +242,9 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
                 extractionField={extractionField}
                 onExtractionTypeChange={(newType) => handleExtractionTypeChange(index, newType)}
                 onDescriptionChange={(newDesc) => handleDescriptionChange(index, newDesc)}
+                applyChecked={applyChecked.has(extractionField.field.id)}
+                onApplyCheckedChange={(checked) => handleApplyCheckedChange(extractionField.field.id, checked)}
+                isApplyEnabled={hasExtracted && extractionField.confidence !== 'red' && extractionField.confidence !== null}
               />
             ))}
           </>
@@ -189,10 +255,16 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
         <PrimaryButton
           text={isExtracting ? 'Extracting...' : 'Extract'}
           onClick={handleExtract}
-          disabled={isExtracting || extractionFields.length === 0}
+          disabled={isExtracting || isApplying || extractionFields.length === 0}
           iconProps={isExtracting ? undefined : { iconName: 'KeyPhraseExtraction' }}
         />
-        <DefaultButton text="Cancel" onClick={onDismiss} disabled={isExtracting} />
+        <PrimaryButton
+          text={isApplying ? 'Applying...' : 'Apply'}
+          onClick={handleApply}
+          disabled={applyChecked.size === 0 || isApplying || isExtracting}
+          iconProps={isApplying ? undefined : { iconName: 'Accept' }}
+        />
+        <DefaultButton text="Cancel" onClick={onDismiss} disabled={isExtracting || isApplying} />
       </Stack>
     </Stack>
   );

@@ -120,7 +120,7 @@ describe('MetadataExtractionService', () => {
           }),
         }),
         expect.objectContaining({
-          Accept: 'application/json;odata=verbose',
+          Accept: 'application/json;odata=nometadata',
         })
       );
     });
@@ -359,8 +359,7 @@ describe('MetadataExtractionService', () => {
           {
             Row: [
               {
-                Category: 'Engineering',
-                'Category.': '5;#Engineering|term-guid-123',
+                Category: { Label: 'Engineering', TermID: 'term-guid-123' },
               },
             ],
           },
@@ -374,7 +373,7 @@ describe('MetadataExtractionService', () => {
       expect(fields[0].value).toEqual({
         termGuid: 'term-guid-123',
         label: 'Engineering',
-        wssId: 5,
+        wssId: undefined,
       });
     });
 
@@ -391,8 +390,10 @@ describe('MetadataExtractionService', () => {
           {
             Row: [
               {
-                Tags: 'Tag One; Tag Two',
-                'Tags.': '10;#Tag One|guid-1;#20;#Tag Two|guid-2',
+                Tags: [
+                  { Label: 'Tag One', TermID: 'guid-1' },
+                  { Label: 'Tag Two', TermID: 'guid-2' },
+                ],
               },
             ],
           },
@@ -404,8 +405,8 @@ describe('MetadataExtractionService', () => {
 
       expect(fields[0]).toBeInstanceOf(TaxonomyMultiField);
       expect(fields[0].value).toEqual([
-        { termGuid: 'guid-1', label: 'Tag One', wssId: 10 },
-        { termGuid: 'guid-2', label: 'Tag Two', wssId: 20 },
+        { termGuid: 'guid-1', label: 'Tag One', wssId: undefined },
+        { termGuid: 'guid-2', label: 'Tag Two', wssId: undefined },
       ]);
     });
 
