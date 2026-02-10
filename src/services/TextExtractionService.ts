@@ -4,7 +4,7 @@ import type { ITextExtractionService, ITextExtractionResponse } from './ITextExt
 export class TextExtractionService implements ITextExtractionService {
   constructor(
     private readonly _aadHttpClient: IAadHttpClient,
-    private readonly _baseUrl: string = 'http://localhost:3000'
+    private readonly _baseUrl: string
   ) {}
 
   public async extractText(documentUrl: string): Promise<ITextExtractionResponse> {

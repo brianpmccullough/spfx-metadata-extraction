@@ -24,7 +24,6 @@ export interface IMetadataPanelProps {
   documentContext: IDocumentContext;
   llmService: ILlmExtractionService;
   onDismiss: () => void;
-  onSave: (extractionFields: MetadataExtractionField[]) => void;
   onApply: (fields: Array<{ internalName: string; value: string | number | boolean | null }>) => Promise<void>;
 }
 
@@ -33,7 +32,6 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
   documentContext,
   llmService,
   onDismiss,
-  onSave,
   onApply,
 }) => {
   const [extractionFields, setExtractionFields] = React.useState<MetadataExtractionField[]>([]);
@@ -141,7 +139,6 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
         }
         setApplyChecked(autoChecked);
 
-        onSave(updated);
         return updated;
       });
 
@@ -151,7 +148,7 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
     } finally {
       setIsExtracting(false);
     }
-  }, [extractionFields, documentContext, llmService, onSave]);
+  }, [extractionFields, documentContext, llmService]);
 
   const handleApplyCheckedChange = React.useCallback(
     (fieldId: string, checked: boolean): void => {

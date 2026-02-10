@@ -3,11 +3,10 @@ import { IDocumentContext } from "../../models/IDocumentContext";
 import { DocumentContextFactory } from "./DocumentContextFactory";
 
 export class MetadataExtractionContext {
-    private readonly _factory: DocumentContextFactory = new DocumentContextFactory();
-
     constructor(
         private readonly context: ListViewCommandSetContext,
-        private readonly allowedFileTypes: string[]
+        private readonly allowedFileTypes: string[],
+        private readonly _factory: DocumentContextFactory = new DocumentContextFactory()
     ) {}
 
     public get selectedRowCount(): number {

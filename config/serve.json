@@ -9,7 +9,8 @@
         "c2fbb0ac-b2e6-48ff-8b6a-af3065224b39": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
-            "allowedFileTypes": [".pdf", ".doc", ".docx"]
+            "allowedFileTypes": [".pdf", ".doc", ".docx"],
+            "baseApiUrl": "http://localhost:3000"
           }
         }
       }
@@ -20,7 +21,8 @@
         "c2fbb0ac-b2e6-48ff-8b6a-af3065224b39": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
-            "allowedFileTypes": [".pdf", ".doc", ".docx"]
+            "allowedFileTypes": [".pdf", ".doc", ".docx"],
+            "baseApiUrl": "http://localhost:3000"
           }
         }
       }

@@ -8,7 +8,7 @@ import type {
 export class LlmExtractionService implements ILlmExtractionService {
   constructor(
     private readonly _aadHttpClient: IAadHttpClient,
-    private readonly _baseUrl: string = 'http://localhost:3000'
+    private readonly _baseUrl: string
   ) {}
 
   public async extract(request: IExtractionRequest): Promise<IExtractionResponse> {

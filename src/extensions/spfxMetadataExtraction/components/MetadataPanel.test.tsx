@@ -68,7 +68,6 @@ async function renderPanel(
     documentContext: makeMockDocumentContext(),
     llmService: makeMockLlmService(),
     onDismiss: jest.fn(),
-    onSave: jest.fn(),
     onApply: jest.fn().mockResolvedValue(undefined),
     ...props,
   };
@@ -102,7 +101,6 @@ describe('MetadataPanel', () => {
           documentContext={makeMockDocumentContext()}
           llmService={makeMockLlmService()}
           onDismiss={jest.fn()}
-          onSave={jest.fn()}
           onApply={jest.fn().mockResolvedValue(undefined)}
         />,
         container

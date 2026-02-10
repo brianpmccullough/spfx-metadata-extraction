@@ -1,10 +1,10 @@
-import type { IDocumentContext } from '../../models/IDocumentContext';
-import type { ISharePointRestClient } from '../../clients/ISharePointRestClient';
+import type { IDocumentContext } from '../models/IDocumentContext';
+import type { ISharePointRestClient } from '../clients/ISharePointRestClient';
 import type { IMetadataExtractionService } from './IMetadataExtractionService';
-import type { ISharePointRestCollectionResponse } from '../../clients/ISharePointRestCollectionResponse';
-import type { ITaxonomyService } from '../../services/ITaxonomyService';
-import { TaxonomyService } from '../../services/TaxonomyService';
-import { FieldBase, FieldFactory, ISharePointFieldSchema } from '../../models/fields';
+import type { ISharePointRestCollectionResponse } from '../clients/ISharePointRestCollectionResponse';
+import type { ITaxonomyService } from './ITaxonomyService';
+import { TaxonomyService } from './TaxonomyService';
+import { FieldBase, FieldFactory, ISharePointFieldSchema } from '../models/fields';
 
 /**
  * Extended SharePoint field response including properties needed for

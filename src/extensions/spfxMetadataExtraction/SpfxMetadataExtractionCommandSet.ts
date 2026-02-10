@@ -7,7 +7,7 @@ import {
 } from '@microsoft/sp-listview-extensibility';
 import { MetadataExtractionContext } from './MetadataExtractionContext';
 import { SharePointRestClient } from '../../clients/SharePointRestClient';
-import { MetadataExtractionService } from './MetadataExtractionService';
+import { MetadataExtractionService } from '../../services/MetadataExtractionService';
 import { MetadataDialog } from './MetadataDialog';
 import { TextExtractionDialog } from './TextExtractionDialog';
 import { TextExtractionService, LlmExtractionService } from '../../services';
@@ -16,6 +16,7 @@ import { AadHttpClientWrapper } from '../../clients/AadHttpClientWrapper';
 
 export interface ISpfxMetadataExtractionCommandSetProperties {
   allowedFileTypes: string[];
+  baseApiUrl: string;
 }
 
 enum Commands {
@@ -51,8 +52,12 @@ export default class SpfxMetadataExtractionCommandSet extends BaseListViewComman
     // Create AAD HTTP client for extraction APIs with Entra ID authentication
     const aadHttpClient = await this.context.aadHttpClientFactory.getClient('d93c7720-43a9-4924-99c5-68464eb75b20');
     const aadHttpClientWrapper = new AadHttpClientWrapper(aadHttpClient);
-    this._textExtractionService = new TextExtractionService(aadHttpClientWrapper);
-    this._llmExtractionService = new LlmExtractionService(aadHttpClientWrapper);
+    const apiBaseUrl = this.properties.baseApiUrl;
+    if (!apiBaseUrl) {
+      throw new Error('baseApiUrl property is required but was not configured.');
+    }
+    this._textExtractionService = new TextExtractionService(aadHttpClientWrapper, apiBaseUrl);
+    this._llmExtractionService = new LlmExtractionService(aadHttpClientWrapper, apiBaseUrl);
   }
 
   public onExecute(event: IListViewCommandSetExecuteEventParameters): void {

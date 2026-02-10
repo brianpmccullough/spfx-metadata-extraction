@@ -1,8 +1,8 @@
 import { MetadataExtractionService } from './MetadataExtractionService';
-import type { IDocumentContext } from '../../models/IDocumentContext';
-import type { ISharePointRestClient } from '../../clients/ISharePointRestClient';
-import type { ITaxonomyService } from '../../services/ITaxonomyService';
-import { FieldKind, StringField, ChoiceField, NumericField, BooleanField, UnsupportedField, TaxonomyField, TaxonomyMultiField } from '../../models/fields';
+import type { IDocumentContext } from '../models/IDocumentContext';
+import type { ISharePointRestClient } from '../clients/ISharePointRestClient';
+import type { ITaxonomyService } from './ITaxonomyService';
+import { FieldKind, StringField, ChoiceField, NumericField, BooleanField, UnsupportedField, TaxonomyField, TaxonomyMultiField } from '../models/fields';
 
 function makeMockDocumentContext(overrides?: Partial<IDocumentContext>): IDocumentContext {
   return {
