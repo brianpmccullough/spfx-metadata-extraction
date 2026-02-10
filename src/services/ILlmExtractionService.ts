@@ -1,5 +1,4 @@
-import type { IDocumentContext } from '../models/IDocumentContext';
-import type { IFieldSchema } from '../models/extraction';
+import type { IFieldSchema, ExtractionConfidence } from '../models/extraction';
 
 /**
  * Document location specified by path.
@@ -28,11 +27,6 @@ export interface IExtractionRequest {
   /** Array of metadata fields to extract */
   fields: IFieldSchema[];
 }
-
-/**
- * Confidence level for an extraction result.
- */
-export type ExtractionConfidence = 'red' | 'yellow' | 'green';
 
 /**
  * Single field extraction result from LLM.
@@ -65,20 +59,4 @@ export interface ILlmExtractionService {
    * @returns Promise resolving to extraction results
    */
   extract(request: IExtractionRequest): Promise<IExtractionResponse>;
-}
-
-/**
- * Helper to build an extraction request from document context and fields.
- */
-export function buildExtractionRequest(
-  documentContext: IDocumentContext,
-  fields: IFieldSchema[]
-): IExtractionRequest {
-  return {
-    document: {
-      driveId: documentContext.driveId,
-      driveItemId: documentContext.driveItemId,
-    },
-    fields,
-  };
 }

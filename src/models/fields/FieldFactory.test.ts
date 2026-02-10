@@ -137,9 +137,9 @@ describe('FieldFactory', () => {
       const field = await factory.createField(
         schema,
         {
-          TermGuid: 'term-1',
-          Label: 'Term One',
-          WssId: 10,
+          termGuid: 'term-1',
+          label: 'Term One',
+          wssId: 10,
         },
         siteUrl
       );
@@ -173,8 +173,8 @@ describe('FieldFactory', () => {
       const field = await factory.createField(
         schema,
         [
-          { TermGuid: 'term-1', Label: 'Term One' },
-          { TermGuid: 'term-2', Label: 'Term Two' },
+          { termGuid: 'term-1', label: 'Term One' },
+          { termGuid: 'term-2', label: 'Term Two' },
         ],
         siteUrl
       );

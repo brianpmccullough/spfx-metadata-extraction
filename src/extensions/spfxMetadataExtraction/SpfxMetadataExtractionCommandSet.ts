@@ -6,13 +6,13 @@ import {
   type ListViewStateChangedEventArgs
 } from '@microsoft/sp-listview-extensibility';
 import { MetadataExtractionContext } from './MetadataExtractionContext';
-import { SharePointRestClient } from '../../clients/SharePointRestClient';
+import { SharePointRestClient, AadHttpClientWrapper } from '../../clients';
+import type { ISharePointRestClient } from '../../clients';
 import { MetadataExtractionService } from '../../services/MetadataExtractionService';
 import { MetadataDialog } from './MetadataDialog';
 import { TextExtractionDialog } from './TextExtractionDialog';
 import { TextExtractionService, LlmExtractionService } from '../../services';
-import type { ILlmExtractionService } from '../../services';
-import { AadHttpClientWrapper } from '../../clients/AadHttpClientWrapper';
+import type { ILlmExtractionService, ITextExtractionService, IMetadataExtractionService } from '../../services';
 
 export interface ISpfxMetadataExtractionCommandSetProperties {
   aadClientId: string;
@@ -29,10 +29,10 @@ const LOG_SOURCE: string = 'SpfxMetadataExtractionCommandSet';
 
 export default class SpfxMetadataExtractionCommandSet extends BaseListViewCommandSet<ISpfxMetadataExtractionCommandSetProperties> {
 
-  private _metadataExtractionService!: MetadataExtractionService;
-  private _textExtractionService!: TextExtractionService;
+  private _metadataExtractionService!: IMetadataExtractionService;
+  private _textExtractionService!: ITextExtractionService;
   private _llmExtractionService!: ILlmExtractionService;
-  private _sharePointRestClient!: SharePointRestClient;
+  private _sharePointRestClient!: ISharePointRestClient;
   private _allowedFileTypes!: string[];
 
   public async onInit(): Promise<void> {

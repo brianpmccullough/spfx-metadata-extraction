@@ -1,4 +1,5 @@
 import type { FieldBase } from '../fields';
+import type { IDocumentContext } from '../IDocumentContext';
 import {
   FieldKind,
   ChoiceField,
@@ -7,7 +8,10 @@ import {
   TaxonomyMultiField,
   DateTimeField,
 } from '../fields';
-import type { ExtractionConfidence } from '../../services/ILlmExtractionService';
+/**
+ * Confidence level for an extraction result.
+ */
+export type ExtractionConfidence = 'red' | 'yellow' | 'green';
 
 /**
  * Simple field types for LLM metadata extraction.
@@ -134,6 +138,22 @@ export class MetadataExtractionField {
       title: this.field.title,
       description: this.description,
       dataType: this.extractionType,
+    };
+  }
+
+  /**
+   * Builds an extraction request from document context and fields.
+   */
+  public static buildExtractionRequest(
+    documentContext: IDocumentContext,
+    fields: MetadataExtractionField[]
+  ): { document: { driveId: string; driveItemId: string }; fields: IFieldSchema[] } {
+    return {
+      document: {
+        driveId: documentContext.driveId,
+        driveItemId: documentContext.driveItemId,
+      },
+      fields: fields.map((f) => f.toSchema()),
     };
   }
 }

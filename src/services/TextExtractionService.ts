@@ -1,4 +1,4 @@
-import type { IAadHttpClient } from '../clients/AadHttpClientWrapper';
+import type { IAadHttpClient } from '../clients';
 import type { ITextExtractionService, ITextExtractionResponse } from './ITextExtractionService';
 
 export class TextExtractionService implements ITextExtractionService {

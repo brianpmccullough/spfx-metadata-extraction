@@ -16,7 +16,6 @@ import {
 } from '../../../models/extraction';
 import type { IDocumentContext } from '../../../models/IDocumentContext';
 import type { ILlmExtractionService } from '../../../services';
-import { buildExtractionRequest } from '../../../services';
 import { MetadataRow } from './MetadataRow';
 
 export interface IMetadataPanelProps {
@@ -109,9 +108,8 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
     );
 
     try {
-      // Build schema from extraction fields
-      const schema = extractionFields.map((ef) => ef.toSchema());
-      const request = buildExtractionRequest(documentContext, schema);
+      // Build extraction request from fields and document context
+      const request = MetadataExtractionField.buildExtractionRequest(documentContext, extractionFields);
 
       // Call LLM extraction service
       const response = await llmService.extract(request);

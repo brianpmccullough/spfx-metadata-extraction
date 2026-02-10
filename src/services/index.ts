@@ -3,11 +3,9 @@ export type {
   IExtractionRequest,
   IExtractionResponse,
   IExtractionResult,
-  ExtractionConfidence,
   IDocumentPathLocation,
   IDocumentDriveLocation,
 } from './ILlmExtractionService';
-export { buildExtractionRequest } from './ILlmExtractionService';
 export { StubLlmExtractionService } from './StubLlmExtractionService';
 export { LlmExtractionService } from './LlmExtractionService';
 export { TaxonomyService } from './TaxonomyService';

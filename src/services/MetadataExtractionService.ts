@@ -1,10 +1,9 @@
 import type { IDocumentContext } from '../models/IDocumentContext';
-import type { ISharePointRestClient } from '../clients/ISharePointRestClient';
+import type { ISharePointRestClient, ISharePointRestCollectionResponse } from '../clients';
 import type { IMetadataExtractionService } from './IMetadataExtractionService';
-import type { ISharePointRestCollectionResponse } from '../clients/ISharePointRestCollectionResponse';
 import type { ITaxonomyService } from './ITaxonomyService';
 import { TaxonomyService } from './TaxonomyService';
-import { FieldBase, FieldFactory, ISharePointFieldSchema } from '../models/fields';
+import { FieldBase, FieldFactory, ISharePointFieldSchema, type ITaxonomyValue } from '../models/fields';
 
 /**
  * Extended SharePoint field response including properties needed for
@@ -192,11 +191,9 @@ export class MetadataExtractionService implements IMetadataExtractionService {
 
   /**
    * Parses single taxonomy value from RenderListDataAsStream response.
-   * Format: { Label: string, TermID: string } or array with single item
+   * Normalizes { Label, TermID } API format directly to ITaxonomyValue.
    */
-  private parseTaxonomyValue(
-    value: unknown
-  ): { Label: string; TermGuid: string } | null {
+  private parseTaxonomyValue(value: unknown): ITaxonomyValue | null {
     if (!value) {
       return null;
     }
@@ -208,7 +205,7 @@ export class MetadataExtractionService implements IMetadataExtractionService {
       }
       const item = value[0] as { Label?: string; TermID?: string };
       if (item.Label && item.TermID) {
-        return { Label: item.Label, TermGuid: item.TermID };
+        return { label: item.Label, termGuid: item.TermID };
       }
       return null;
     }
@@ -216,7 +213,7 @@ export class MetadataExtractionService implements IMetadataExtractionService {
     // Handle object format
     const obj = value as { Label?: string; TermID?: string };
     if (obj.Label && obj.TermID) {
-      return { Label: obj.Label, TermGuid: obj.TermID };
+      return { label: obj.Label, termGuid: obj.TermID };
     }
 
     return null;
@@ -224,24 +221,19 @@ export class MetadataExtractionService implements IMetadataExtractionService {
 
   /**
    * Parses multi-value taxonomy from RenderListDataAsStream response.
-   * Format: Array of { Label: string, TermID: string } objects
+   * Normalizes Array of { Label, TermID } API format directly to ITaxonomyValue[].
    */
-  private parseTaxonomyMultiValue(
-    value: unknown
-  ): Array<{ Label: string; TermGuid: string }> | null {
+  private parseTaxonomyMultiValue(value: unknown): ITaxonomyValue[] | null {
     if (!value || !Array.isArray(value) || value.length === 0) {
       return null;
     }
 
-    const results: Array<{ Label: string; TermGuid: string }> = [];
+    const results: ITaxonomyValue[] = [];
 
     for (const item of value) {
-      const obj = item as { Label?: string; TermID?: string };
-      if (obj.Label && obj.TermID) {
-        results.push({
-          Label: obj.Label,
-          TermGuid: obj.TermID,
-        });
+      const parsed = this.parseTaxonomyValue(item);
+      if (parsed) {
+        results.push(parsed);
       }
     }
 

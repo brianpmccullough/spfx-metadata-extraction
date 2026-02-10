@@ -1,5 +1,5 @@
 import { MetadataExtractionService } from './MetadataExtractionService';
-import type { ISharePointRestClient } from '../clients/ISharePointRestClient';
+import type { ISharePointRestClient } from '../clients';
 import type { ITaxonomyService } from './ITaxonomyService';
 import { FieldKind, StringField, ChoiceField, NumericField, BooleanField, UnsupportedField, TaxonomyField, TaxonomyMultiField } from '../models/fields';
 import { makeMockDocumentContext } from '../__test-utils__/fixtures';

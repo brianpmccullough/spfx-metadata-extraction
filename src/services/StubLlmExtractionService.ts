@@ -3,9 +3,9 @@ import type {
   IExtractionRequest,
   IExtractionResponse,
   IExtractionResult,
-  ExtractionConfidence,
   IDocumentDriveLocation,
 } from './ILlmExtractionService';
+import type { ExtractionConfidence } from '../models/extraction';
 import { MetadataExtractionFieldType } from '../models/extraction';
 
 /**

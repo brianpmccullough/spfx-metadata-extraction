@@ -1,5 +1,5 @@
 import { TaxonomyService } from './TaxonomyService';
-import type { ISharePointRestClient } from '../clients/ISharePointRestClient';
+import type { ISharePointRestClient } from '../clients';
 
 describe('TaxonomyService', () => {
   const siteUrl = 'https://contoso.sharepoint.com/sites/TestSite';

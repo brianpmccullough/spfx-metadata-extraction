@@ -1,4 +1,4 @@
-import type { ISharePointRestClient } from '../clients/ISharePointRestClient';
+import type { ISharePointRestClient } from '../clients';
 import type { ITerm } from '../models/fields/TaxonomyField';
 import type { ITaxonomyService } from './ITaxonomyService';
 

@@ -230,9 +230,9 @@ export class FieldFactory implements IFieldFactory {
     if (value === null || value === undefined) {
       return null;
     }
-    const v = value as { TermGuid?: string; Label?: string; WssId?: number };
-    if (v.TermGuid && v.Label) {
-      return { termGuid: v.TermGuid, label: v.Label, wssId: v.WssId };
+    const v = value as { termGuid?: string; label?: string; wssId?: number };
+    if (v.termGuid && v.label) {
+      return { termGuid: v.termGuid, label: v.label, wssId: v.wssId };
     }
     return null;
   }
