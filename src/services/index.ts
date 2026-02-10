@@ -6,7 +6,6 @@ export type {
   IDocumentPathLocation,
   IDocumentDriveLocation,
 } from './ILlmExtractionService';
-export { StubLlmExtractionService } from './StubLlmExtractionService';
 export { LlmExtractionService } from './LlmExtractionService';
 export { TaxonomyService } from './TaxonomyService';
 export type { ITaxonomyService } from './ITaxonomyService';

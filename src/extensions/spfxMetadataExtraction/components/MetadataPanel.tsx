@@ -39,12 +39,13 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
   const [isApplying, setIsApplying] = React.useState(false);
   const [hasExtracted, setHasExtracted] = React.useState(false);
   const [applyChecked, setApplyChecked] = React.useState<Set<string>>(new Set());
+  const [loadError, setLoadError] = React.useState<string>();
   const [error, setError] = React.useState<string>();
 
   React.useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
-    setError(undefined);
+    setLoadError(undefined);
 
     loadFields()
       .then((loadedFields) => {
@@ -56,7 +57,7 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err.message || 'Failed to load fields');
+          setLoadError(err.message || 'Failed to load fields');
           setIsLoading(false);
         }
       });
@@ -191,10 +192,10 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
     );
   }
 
-  if (error) {
+  if (loadError) {
     return (
       <Stack style={{ padding: 24 }}>
-        <MessageBar messageBarType={MessageBarType.error}>{error}</MessageBar>
+        <MessageBar messageBarType={MessageBarType.error}>{loadError}</MessageBar>
         <Stack horizontal horizontalAlign="end" tokens={{ childrenGap: 8 }} style={{ marginTop: 16 }}>
           <DefaultButton text="Close" onClick={onDismiss} />
         </Stack>

@@ -4,7 +4,7 @@ import type {
   IExtractionResponse,
   IExtractionResult,
   IDocumentDriveLocation,
-} from './ILlmExtractionService';
+} from '../services/ILlmExtractionService';
 import type { ExtractionConfidence } from '../models/extraction';
 import { MetadataExtractionFieldType } from '../models/extraction';
 

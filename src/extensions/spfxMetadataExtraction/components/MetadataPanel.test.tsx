@@ -207,4 +207,70 @@ describe('MetadataPanel', () => {
     expect(messageBar).not.toBeNull();
     expect(messageBar!.textContent).toContain('No fields available for metadata extraction');
   });
+
+  it('shows extraction error inline while preserving field state', async () => {
+    const llmService: ILlmExtractionService = {
+      extract: jest.fn().mockRejectedValue(new Error('LLM service unavailable')),
+    };
+    await renderPanel(container, { llmService });
+
+    // Fields should be rendered
+    const labels = container.querySelectorAll('.ms-Label');
+    expect(Array.from(labels).map((l) => l.textContent)).toContain('Title Field');
+
+    // Click Extract to trigger the error
+    const buttons = Array.from(container.querySelectorAll('.ms-Button'));
+    const extractButton = buttons.find((b) => b.textContent === 'Extract') as HTMLElement;
+
+    await act(async () => {
+      extractButton.click();
+      await flushPromises();
+    });
+
+    // Error should be shown inline
+    const messageBar = container.querySelector('.ms-MessageBar');
+    expect(messageBar).not.toBeNull();
+    expect(messageBar!.textContent).toContain('LLM service unavailable');
+
+    // Fields should still be visible
+    const labelsAfter = container.querySelectorAll('.ms-Label');
+    expect(Array.from(labelsAfter).map((l) => l.textContent)).toContain('Title Field');
+
+    // Extract button should still be available for retry
+    const buttonsAfter = Array.from(container.querySelectorAll('.ms-Button'));
+    expect(buttonsAfter.map((b) => b.textContent)).toContain('Extract');
+  });
+
+  it('shows apply error inline while preserving field state', async () => {
+    const onApply = jest.fn().mockRejectedValue(new Error('Permission denied'));
+    const llmService = makeMockLlmService();
+    await renderPanel(container, { llmService, onApply });
+
+    // Click Extract first to populate results
+    const extractButton = Array.from(container.querySelectorAll('.ms-Button'))
+      .find((b) => b.textContent === 'Extract') as HTMLElement;
+
+    await act(async () => {
+      extractButton.click();
+      await flushPromises();
+    });
+
+    // Click Apply to trigger the error
+    const applyButton = Array.from(container.querySelectorAll('.ms-Button'))
+      .find((b) => b.textContent === 'Apply') as HTMLElement;
+
+    await act(async () => {
+      applyButton.click();
+      await flushPromises();
+    });
+
+    // Error should be shown inline
+    const messageBar = container.querySelector('.ms-MessageBar');
+    expect(messageBar).not.toBeNull();
+    expect(messageBar!.textContent).toContain('Permission denied');
+
+    // Fields should still be visible
+    const labels = container.querySelectorAll('.ms-Label');
+    expect(Array.from(labels).map((l) => l.textContent)).toContain('Title Field');
+  });
 });
