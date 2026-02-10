@@ -1,35 +1,8 @@
 import { MetadataExtractionService } from './MetadataExtractionService';
-import type { IDocumentContext } from '../models/IDocumentContext';
 import type { ISharePointRestClient } from '../clients/ISharePointRestClient';
 import type { ITaxonomyService } from './ITaxonomyService';
 import { FieldKind, StringField, ChoiceField, NumericField, BooleanField, UnsupportedField, TaxonomyField, TaxonomyMultiField } from '../models/fields';
-
-function makeMockDocumentContext(overrides?: Partial<IDocumentContext>): IDocumentContext {
-  return {
-    contentTypeId: '0x0101',
-    fileExtension: 'docx',
-    fileName: 'report.docx',
-    fileLeafRef: 'report.docx',
-    fileRef: '/sites/TestSite/Documents/report.docx',
-    fileSize: 204800,
-    fileSizeInBytes: 204800,
-    fileSizeInKiloBytes: 200,
-    fileSizeInMegaBytes: 0.1953,
-    fileType: 'docx',
-    serverRelativeUrl: '/sites/TestSite/Documents/report.docx',
-    itemId: 42,
-    uniqueId: '{AAAA-BBBB-CCCC-DDDD}',
-    driveId: 'driveABC123',
-    driveItemId: 'itemDEF456',
-    spItemUrl: 'https://graph.microsoft.com/v1.0/drives/driveABC123/items/itemDEF456',
-    siteUrl: 'https://contoso.sharepoint.com/sites/TestSite',
-    webUrl: 'https://contoso.sharepoint.com/sites/TestSite',
-    siteId: 'site-guid-1234',
-    webId: 'web-guid-5678',
-    listId: 'list-guid-9012',
-    ...overrides,
-  };
-}
+import { makeMockDocumentContext } from '../__test-utils__/fixtures';
 
 interface IMockClientConfig {
   getResponses?: unknown[];
@@ -165,7 +138,6 @@ describe('MetadataExtractionService', () => {
       expect(url).toContain('Choices');
       expect(url).toContain('DisplayFormat');
       expect(url).toContain('TermSetId');
-      expect(url).toContain('SspId');
     });
 
     it('uses RenderListDataAsStream to get field values', async () => {
@@ -422,7 +394,7 @@ describe('MetadataExtractionService', () => {
         getResponses: [
           {
             value: [
-              { Id: 'f1', InternalName: 'Category', Title: 'Category', TypeAsString: 'TaxonomyFieldType', Required: false, ReadOnlyField: false, Description: '', TermSetId: 'ts-1', SspId: 'ssp-1' },
+              { Id: 'f1', InternalName: 'Category', Title: 'Category', TypeAsString: 'TaxonomyFieldType', Required: false, ReadOnlyField: false, Description: '', TermSetId: 'ts-1' },
             ],
           },
         ],
@@ -453,7 +425,7 @@ describe('MetadataExtractionService', () => {
         getResponses: [
           {
             value: [
-              { Id: 'f1', InternalName: 'Tags', Title: 'Tags', TypeAsString: 'TaxonomyFieldTypeMulti', Required: false, ReadOnlyField: false, Description: '', TermSetId: 'ts-1', SspId: 'ssp-1' },
+              { Id: 'f1', InternalName: 'Tags', Title: 'Tags', TypeAsString: 'TaxonomyFieldTypeMulti', Required: false, ReadOnlyField: false, Description: '', TermSetId: 'ts-1' },
             ],
           },
         ],
@@ -486,7 +458,7 @@ describe('MetadataExtractionService', () => {
         getResponses: [
           {
             value: [
-              { Id: 'f1', InternalName: 'Category', Title: 'Category', TypeAsString: 'TaxonomyFieldType', Required: false, ReadOnlyField: false, Description: '', TermSetId: 'ts-1', SspId: 'ssp-1' },
+              { Id: 'f1', InternalName: 'Category', Title: 'Category', TypeAsString: 'TaxonomyFieldType', Required: false, ReadOnlyField: false, Description: '', TermSetId: 'ts-1' },
             ],
           },
         ],

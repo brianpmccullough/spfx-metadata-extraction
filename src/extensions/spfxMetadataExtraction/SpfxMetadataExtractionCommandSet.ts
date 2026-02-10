@@ -15,6 +15,7 @@ import type { ILlmExtractionService } from '../../services';
 import { AadHttpClientWrapper } from '../../clients/AadHttpClientWrapper';
 
 export interface ISpfxMetadataExtractionCommandSetProperties {
+  aadClientId: string;
   allowedFileTypes: string[];
   baseApiUrl: string;
 }
@@ -50,7 +51,11 @@ export default class SpfxMetadataExtractionCommandSet extends BaseListViewComman
     this._metadataExtractionService = new MetadataExtractionService(this._sharePointRestClient);
 
     // Create AAD HTTP client for extraction APIs with Entra ID authentication
-    const aadHttpClient = await this.context.aadHttpClientFactory.getClient('d93c7720-43a9-4924-99c5-68464eb75b20');
+    const aadClientId = this.properties.aadClientId;
+    if (!aadClientId) {
+      throw new Error('aadClientId property is required but was not configured.');
+    }
+    const aadHttpClient = await this.context.aadHttpClientFactory.getClient(aadClientId);
     const aadHttpClientWrapper = new AadHttpClientWrapper(aadHttpClient);
     const apiBaseUrl = this.properties.baseApiUrl;
     if (!apiBaseUrl) {

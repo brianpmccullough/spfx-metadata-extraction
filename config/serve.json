@@ -9,6 +9,7 @@
         "c2fbb0ac-b2e6-48ff-8b6a-af3065224b39": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
+            "aadClientId": "d93c7720-43a9-4924-99c5-68464eb75b20",
             "allowedFileTypes": [".pdf", ".doc", ".docx"],
             "baseApiUrl": "http://localhost:3000"
           }
@@ -21,6 +22,7 @@
         "c2fbb0ac-b2e6-48ff-8b6a-af3065224b39": {
           "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
           "properties": {
+            "aadClientId": "d93c7720-43a9-4924-99c5-68464eb75b20",
             "allowedFileTypes": [".pdf", ".doc", ".docx"],
             "baseApiUrl": "http://localhost:3000"
           }

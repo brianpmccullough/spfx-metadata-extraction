@@ -6,6 +6,6 @@
         RegistrationType="List"
         Location="ClientSideExtension.ListViewCommandSet.CommandBar"
         ClientSideComponentId="c2fbb0ac-b2e6-48ff-8b6a-af3065224b39"
-        ClientSideComponentProperties="{&quot;allowedFileTypes&quot;:[&quot;.pdf&quot;,&quot;.doc&quot;,&quot;.docx&quot;],&quot;baseApiUrl&quot;:&quot;https://YOUR-API-URL&quot;}">
+        ClientSideComponentProperties="{&quot;aadClientId&quot;:&quot;YOUR-AAD-CLIENT-ID&quot;,&quot;allowedFileTypes&quot;:[&quot;.pdf&quot;,&quot;.doc&quot;,&quot;.docx&quot;],&quot;baseApiUrl&quot;:&quot;https://YOUR-API-URL&quot;}">
     </CustomAction>
 </Elements>

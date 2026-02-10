@@ -20,7 +20,6 @@ describe('TaxonomyField', () => {
       overrides?.isRequired ?? false,
       value,
       'termset-guid',
-      'ssp-guid',
       overrides?.terms ?? terms
     );
   };
@@ -87,7 +86,6 @@ describe('TaxonomyMultiField', () => {
       overrides?.isRequired ?? false,
       value,
       'termset-guid',
-      'ssp-guid',
       overrides?.terms ?? terms
     );
   };

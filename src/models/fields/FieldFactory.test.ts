@@ -132,7 +132,6 @@ describe('FieldFactory', () => {
       const factory = new FieldFactory(taxonomyService);
       const schema = makeBaseSchema('TaxonomyFieldType', {
         TermSetId: 'termset-123',
-        SspId: 'ssp-456',
       });
 
       const field = await factory.createField(
@@ -147,7 +146,7 @@ describe('FieldFactory', () => {
 
       expect(field).toBeInstanceOf(TaxonomyField);
       expect(field.fieldKind).toBe(FieldKind.Taxonomy);
-      expect(taxonomyService.getTerms).toHaveBeenCalledWith('termset-123', 'ssp-456', siteUrl);
+      expect(taxonomyService.getTerms).toHaveBeenCalledWith('termset-123', siteUrl);
       expect((field as TaxonomyField).terms).toHaveLength(2);
       expect(field.value).toEqual({ termGuid: 'term-1', label: 'Term One', wssId: 10 });
     });
@@ -169,7 +168,6 @@ describe('FieldFactory', () => {
       const factory = new FieldFactory(makeMockTaxonomyService());
       const schema = makeBaseSchema('TaxonomyFieldTypeMulti', {
         TermSetId: 'termset-123',
-        SspId: 'ssp-456',
       });
 
       const field = await factory.createField(

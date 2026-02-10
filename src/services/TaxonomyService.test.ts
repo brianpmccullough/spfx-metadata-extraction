@@ -14,7 +14,7 @@ describe('TaxonomyService', () => {
       const spoClient = makeMockSPOClient({ value: [] });
       const service = new TaxonomyService(spoClient);
 
-      await service.getTerms('termset-guid-123', 'ssp-guid-456', siteUrl);
+      await service.getTerms('termset-guid-123', siteUrl);
 
       expect(spoClient.get).toHaveBeenCalledWith(
         'https://contoso.sharepoint.com/sites/TestSite/_api/v2.1/termStore/sets/termset-guid-123/terms'
@@ -36,7 +36,7 @@ describe('TaxonomyService', () => {
       });
       const service = new TaxonomyService(spoClient);
 
-      const terms = await service.getTerms('termset-guid', 'ssp-guid', siteUrl);
+      const terms = await service.getTerms('termset-guid', siteUrl);
 
       expect(terms).toHaveLength(2);
       expect(terms[0]).toEqual({ termGuid: 'term-guid-1', label: 'Finance' });
@@ -57,7 +57,7 @@ describe('TaxonomyService', () => {
       });
       const service = new TaxonomyService(spoClient);
 
-      const terms = await service.getTerms('termset-guid', 'ssp-guid', siteUrl);
+      const terms = await service.getTerms('termset-guid', siteUrl);
 
       expect(terms[0].label).toBe('Default Label');
     });
@@ -76,7 +76,7 @@ describe('TaxonomyService', () => {
       });
       const service = new TaxonomyService(spoClient);
 
-      const terms = await service.getTerms('termset-guid', 'ssp-guid', siteUrl);
+      const terms = await service.getTerms('termset-guid', siteUrl);
 
       expect(terms[0].label).toBe('First Label');
     });
@@ -85,7 +85,7 @@ describe('TaxonomyService', () => {
       const spoClient = makeMockSPOClient({ value: [] });
       const service = new TaxonomyService(spoClient);
 
-      const terms = await service.getTerms('termset-guid', 'ssp-guid', siteUrl);
+      const terms = await service.getTerms('termset-guid', siteUrl);
 
       expect(terms).toEqual([]);
     });
@@ -97,7 +97,7 @@ describe('TaxonomyService', () => {
       };
       const service = new TaxonomyService(spoClient);
 
-      const terms = await service.getTerms('termset-guid', 'ssp-guid', siteUrl);
+      const terms = await service.getTerms('termset-guid', siteUrl);
 
       expect(terms).toEqual([]);
     });
@@ -113,7 +113,7 @@ describe('TaxonomyService', () => {
       });
       const service = new TaxonomyService(spoClient);
 
-      const terms = await service.getTerms('termset-guid', 'ssp-guid', siteUrl);
+      const terms = await service.getTerms('termset-guid', siteUrl);
 
       expect(terms[0].label).toBe('');
     });

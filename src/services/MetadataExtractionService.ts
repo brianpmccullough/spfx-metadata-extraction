@@ -89,7 +89,6 @@ export class MetadataExtractionService implements IMetadataExtractionService {
       'Choices',
       'DisplayFormat',
       'TermSetId',
-      'SspId',
     ].join(',');
 
     const url = `${documentContext.webUrl}/_api/web/lists(guid'${documentContext.listId}')/contenttypes('${documentContext.contentTypeId}')/fields?$filter=Hidden eq false&$select=${selectFields}`;

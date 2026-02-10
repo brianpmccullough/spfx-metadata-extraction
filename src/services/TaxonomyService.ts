@@ -23,12 +23,8 @@ export class TaxonomyService implements ITaxonomyService {
 
   public async getTerms(
     termSetId: string,
-    _sspId: string,
     siteUrl: string
   ): Promise<ITerm[]> {
-    // Using the modern SharePoint REST API for term store
-    // Note: sspId is accepted for interface compatibility but the v2.1 API
-    // uses the site's default term store
     const url = `${siteUrl}/_api/v2.1/termStore/sets/${termSetId}/terms`;
 
     try {

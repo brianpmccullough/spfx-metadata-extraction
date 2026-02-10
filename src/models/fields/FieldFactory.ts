@@ -25,7 +25,6 @@ export interface ISharePointFieldSchema {
   DisplayFormat?: number;
   // Taxonomy fields
   TermSetId?: string;
-  SspId?: string;
 }
 
 /**
@@ -156,11 +155,9 @@ export class FieldFactory implements IFieldFactory {
     siteUrl: string
   ): Promise<TaxonomyField> {
     const termSetId = schema.TermSetId ?? '';
-    const sspId = schema.SspId ?? '';
-    const terms =
-      termSetId && sspId
-        ? await this._taxonomyService.getTerms(termSetId, sspId, siteUrl)
-        : [];
+    const terms = termSetId
+      ? await this._taxonomyService.getTerms(termSetId, siteUrl)
+      : [];
 
     return new TaxonomyField(
       baseArgs.id,
@@ -170,7 +167,6 @@ export class FieldFactory implements IFieldFactory {
       baseArgs.isRequired,
       this.parseTaxonomyValue(value),
       termSetId,
-      sspId,
       terms
     );
   }
@@ -188,11 +184,9 @@ export class FieldFactory implements IFieldFactory {
     siteUrl: string
   ): Promise<TaxonomyMultiField> {
     const termSetId = schema.TermSetId ?? '';
-    const sspId = schema.SspId ?? '';
-    const terms =
-      termSetId && sspId
-        ? await this._taxonomyService.getTerms(termSetId, sspId, siteUrl)
-        : [];
+    const terms = termSetId
+      ? await this._taxonomyService.getTerms(termSetId, siteUrl)
+      : [];
 
     return new TaxonomyMultiField(
       baseArgs.id,
@@ -202,7 +196,6 @@ export class FieldFactory implements IFieldFactory {
       baseArgs.isRequired,
       this.parseTaxonomyMultiValue(value),
       termSetId,
-      sspId,
       terms
     );
   }

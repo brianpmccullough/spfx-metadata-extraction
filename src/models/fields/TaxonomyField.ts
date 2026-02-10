@@ -31,7 +31,6 @@ export class TaxonomyField extends FieldBase {
     isRequired: boolean,
     public value: ITaxonomyValue | null,
     public readonly termSetId: string,
-    public readonly sspId: string,
     public readonly terms: ITerm[]
   ) {
     super(id, internalName, title, description, isRequired);
@@ -68,7 +67,6 @@ export class TaxonomyMultiField extends FieldBase {
     isRequired: boolean,
     public value: ITaxonomyValue[] | null,
     public readonly termSetId: string,
-    public readonly sspId: string,
     public readonly terms: ITerm[]
   ) {
     super(id, internalName, title, description, isRequired);

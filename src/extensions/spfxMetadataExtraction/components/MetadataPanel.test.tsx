@@ -3,8 +3,8 @@ import * as ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { MetadataPanel, IMetadataPanelProps } from './MetadataPanel';
 import { FieldBase, StringField, NumericField, BooleanField } from '../../../models/fields';
-import type { IDocumentContext } from '../../../models/IDocumentContext';
 import type { ILlmExtractionService, IExtractionResponse } from '../../../services';
+import { makeMockDocumentContext } from '../../../__test-utils__/fixtures';
 
 function makeFields(): FieldBase[] {
   return [
@@ -12,32 +12,6 @@ function makeFields(): FieldBase[] {
     new NumericField('f2', 'CountField', 'Count Field', 'desc 2', false, 42),
     new BooleanField('f3', 'ActiveField', 'Active Field', '', false, true),
   ];
-}
-
-function makeMockDocumentContext(): IDocumentContext {
-  return {
-    contentTypeId: '0x0101',
-    fileExtension: 'docx',
-    fileName: 'test-document.docx',
-    fileLeafRef: 'test-document.docx',
-    fileRef: '/sites/test/Documents/test-document.docx',
-    fileSize: 1024,
-    fileSizeInBytes: 1024,
-    fileSizeInKiloBytes: 1,
-    fileSizeInMegaBytes: 0.001,
-    fileType: 'docx',
-    serverRelativeUrl: '/sites/test/Documents/test-document.docx',
-    itemId: 1,
-    uniqueId: 'guid-1234',
-    driveId: 'drive-id-1',
-    driveItemId: 'item-id-1',
-    spItemUrl: 'https://tenant.sharepoint.com/sites/test/_api/items/1',
-    siteUrl: 'https://tenant.sharepoint.com/sites/test',
-    webUrl: 'https://tenant.sharepoint.com/sites/test',
-    siteId: 'site-guid',
-    webId: 'web-guid',
-    listId: 'list-guid',
-  };
 }
 
 function makeMockLlmService(): ILlmExtractionService {
