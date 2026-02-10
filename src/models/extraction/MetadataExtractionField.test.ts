@@ -62,6 +62,51 @@ describe('MetadataExtractionField', () => {
     });
   });
 
+  describe('clone', () => {
+    it('returns a new instance', () => {
+      const field = new StringField('id1', 'Notes', 'Notes', '', false, 'value');
+      const original = new MetadataExtractionField(field);
+
+      const cloned = original.clone();
+
+      expect(cloned).not.toBe(original);
+      expect(cloned).toBeInstanceOf(MetadataExtractionField);
+    });
+
+    it('preserves all mutable properties', () => {
+      const field = new NumericField('id1', 'Count', 'Count', 'A count', false, 42);
+      const original = new MetadataExtractionField(field);
+      original.extractionType = MetadataExtractionFieldType.String;
+      original.description = 'Custom description';
+      original.extractedValue = 'extracted';
+      original.confidence = 'green';
+
+      const cloned = original.clone();
+
+      expect(cloned.field).toBe(original.field);
+      expect(cloned.extractionType).toBe(MetadataExtractionFieldType.String);
+      expect(cloned.description).toBe('Custom description');
+      expect(cloned.extractedValue).toBe('extracted');
+      expect(cloned.confidence).toBe('green');
+    });
+
+    it('mutations on clone do not affect the original', () => {
+      const field = new StringField('id1', 'Notes', 'Notes', '', false, 'value');
+      const original = new MetadataExtractionField(field);
+      original.extractedValue = 'original value';
+      original.confidence = 'green';
+
+      const cloned = original.clone();
+      cloned.extractedValue = 'modified value';
+      cloned.confidence = 'red';
+      cloned.description = 'modified description';
+
+      expect(original.extractedValue).toBe('original value');
+      expect(original.confidence).toBe('green');
+      expect(original.description).toBe('');
+    });
+  });
+
   describe('mutability', () => {
     it('allows extractionType to be changed', () => {
       const field = new StringField('id1', 'Notes', 'Notes', '', false, 'value');

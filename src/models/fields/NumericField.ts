@@ -25,12 +25,6 @@ export class NumericField extends FieldBase {
     return String(this.value);
   }
 
-  public generateLlmPrompt(): string {
-    const required = this.isRequired ? ' (required)' : '';
-    const desc = this.description ? ` - ${this.description}` : '';
-    return `"${this.title}"${required}: A numeric field${desc}. Current value: ${this.formatForDisplay()}`;
-  }
-
   public serializeForSharePoint(): number | null {
     return this.value;
   }

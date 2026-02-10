@@ -44,6 +44,12 @@ src/extensions/spfxMetadataExtraction/
 - Dialogs use `@microsoft/sp-dialog`
 - SharePoint specific libraries, models, services, classes, etc should be extracted away as soon as possible in favor of domain specific representations.  Ideally, these domain specific representations are created within the Extension.ts (e.g. MetadataExtractionCommandSet.ts which is the bridge between SharePoint Online and custom code) and passed as properties/parameters to custom functionality.
 
+**Service boundaries:**
+
+- All SharePoint REST calls (reads and writes) must go through a service class (e.g., `MetadataExtractionService`). Dialogs and React components must never import or use `ISharePointRestClient` directly.
+- Do not add abstract methods to `FieldBase` unless they are called from production code. Prompt generation lives in `MetadataExtractionField.getExtractionHint()`, not on individual field subclasses.
+- Never mutate objects inside React state updaters. When updating a `MetadataExtractionField` in state, call `ef.clone()` before modifying properties, and return the clone.
+
 **Component ID:** `c2fbb0ac-b2e6-48ff-8b6a-af3065224b39`
 
 ## UI

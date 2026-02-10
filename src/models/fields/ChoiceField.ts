@@ -22,13 +22,6 @@ export class ChoiceField extends FieldBase {
     return this.value ?? '(empty)';
   }
 
-  public generateLlmPrompt(): string {
-    const required = this.isRequired ? ' (required)' : '';
-    const desc = this.description ? ` - ${this.description}` : '';
-    const validChoices = `Valid choices: [${this.choices.map((c) => `"${c}"`).join(', ')}]`;
-    return `"${this.title}"${required}: A single-choice field${desc}. ${validChoices}. Current value: ${this.formatForDisplay()}`;
-  }
-
   public serializeForSharePoint(): string | null {
     return this.value;
   }
@@ -57,13 +50,6 @@ export class MultiChoiceField extends FieldBase {
       return '(empty)';
     }
     return this.value.join(', ');
-  }
-
-  public generateLlmPrompt(): string {
-    const required = this.isRequired ? ' (required)' : '';
-    const desc = this.description ? ` - ${this.description}` : '';
-    const validChoices = `Valid choices: [${this.choices.map((c) => `"${c}"`).join(', ')}]`;
-    return `"${this.title}"${required}: A multi-choice field (select one or more)${desc}. ${validChoices}. Current value: ${this.formatForDisplay()}`;
   }
 
   public serializeForSharePoint(): string | null {

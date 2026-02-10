@@ -35,9 +35,6 @@ export abstract class FieldBase {
   /** Format the current value for display in UI. */
   public abstract formatForDisplay(): string;
 
-  /** Generate a prompt describing this field for LLM extraction. */
-  public abstract generateLlmPrompt(): string;
-
   /** Serialize the value for SharePoint REST API write-back. */
   public abstract serializeForSharePoint(): unknown;
 }

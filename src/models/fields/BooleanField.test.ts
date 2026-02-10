@@ -40,33 +40,6 @@ describe('BooleanField', () => {
     });
   });
 
-  describe('generateLlmPrompt', () => {
-    it('describes as yes/no field', () => {
-      const field = makeField(true);
-      expect(field.generateLlmPrompt()).toContain('yes/no field');
-    });
-
-    it('includes "(required)" when field is required', () => {
-      const field = makeField(true, { isRequired: true });
-      expect(field.generateLlmPrompt()).toContain('(required)');
-    });
-
-    it('includes description when provided', () => {
-      const field = makeField(true, { description: 'Whether the item is active' });
-      expect(field.generateLlmPrompt()).toContain('Whether the item is active');
-    });
-
-    it('includes current value as Yes/No', () => {
-      const field = makeField(true);
-      expect(field.generateLlmPrompt()).toContain('Current value: Yes');
-    });
-
-    it('shows No for false value', () => {
-      const field = makeField(false);
-      expect(field.generateLlmPrompt()).toContain('Current value: No');
-    });
-  });
-
   describe('serializeForSharePoint', () => {
     it('returns true as-is', () => {
       const field = makeField(true);

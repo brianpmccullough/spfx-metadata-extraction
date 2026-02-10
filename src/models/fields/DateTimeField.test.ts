@@ -44,34 +44,6 @@ describe('DateTimeField', () => {
     });
   });
 
-  describe('generateLlmPrompt', () => {
-    it('describes as "date only" when includesTime is false', () => {
-      const field = makeField(null, false);
-      expect(field.generateLlmPrompt()).toContain('date only field');
-    });
-
-    it('describes as "date and time" when includesTime is true', () => {
-      const field = makeField(null, true);
-      expect(field.generateLlmPrompt()).toContain('date and time field');
-    });
-
-    it('includes "(required)" when field is required', () => {
-      const field = makeField(null, false, { isRequired: true });
-      expect(field.generateLlmPrompt()).toContain('(required)');
-    });
-
-    it('includes description when provided', () => {
-      const field = makeField(null, false, { description: 'When the task is due' });
-      expect(field.generateLlmPrompt()).toContain('When the task is due');
-    });
-
-    it('includes current value', () => {
-      const date = new Date('2024-06-15T10:30:00Z');
-      const field = makeField(date, false);
-      expect(field.generateLlmPrompt()).toContain(`Current value: ${date.toLocaleDateString()}`);
-    });
-  });
-
   describe('serializeForSharePoint', () => {
     it('returns ISO 8601 string', () => {
       const date = new Date('2024-06-15T10:30:00Z');

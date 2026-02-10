@@ -113,6 +113,19 @@ export class MetadataExtractionField {
   }
 
   /**
+   * Creates a shallow clone with all mutable state copied.
+   * The underlying field reference is shared (it's immutable).
+   */
+  public clone(): MetadataExtractionField {
+    const cloned = new MetadataExtractionField(this.field);
+    cloned.extractionType = this.extractionType;
+    cloned.description = this.description;
+    cloned.extractedValue = this.extractedValue;
+    cloned.confidence = this.confidence;
+    return cloned;
+  }
+
+  /**
    * Returns schema representation for LLM extraction API.
    */
   public toSchema(): IFieldSchema {

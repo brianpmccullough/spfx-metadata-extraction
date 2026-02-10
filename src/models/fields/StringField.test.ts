@@ -37,38 +37,6 @@ describe('StringField', () => {
     });
   });
 
-  describe('generateLlmPrompt', () => {
-    it('includes field title', () => {
-      const field = makeField('test');
-      expect(field.generateLlmPrompt()).toContain('"Display Title"');
-    });
-
-    it('includes "(required)" when field is required', () => {
-      const field = makeField('test', { isRequired: true });
-      expect(field.generateLlmPrompt()).toContain('(required)');
-    });
-
-    it('does not include "(required)" when field is optional', () => {
-      const field = makeField('test', { isRequired: false });
-      expect(field.generateLlmPrompt()).not.toContain('(required)');
-    });
-
-    it('includes description when provided', () => {
-      const field = makeField('test', { description: 'Field description here' });
-      expect(field.generateLlmPrompt()).toContain('Field description here');
-    });
-
-    it('includes current value', () => {
-      const field = makeField('Current Value');
-      expect(field.generateLlmPrompt()).toContain('Current value: Current Value');
-    });
-
-    it('shows "(empty)" for null value', () => {
-      const field = makeField(null);
-      expect(field.generateLlmPrompt()).toContain('Current value: (empty)');
-    });
-  });
-
   describe('serializeForSharePoint', () => {
     it('returns the value as-is', () => {
       const field = makeField('test value');

@@ -28,13 +28,6 @@ export class DateTimeField extends FieldBase {
       : this.value.toLocaleDateString();
   }
 
-  public generateLlmPrompt(): string {
-    const required = this.isRequired ? ' (required)' : '';
-    const desc = this.description ? ` - ${this.description}` : '';
-    const format = this.includesTime ? 'date and time' : 'date only';
-    return `"${this.title}"${required}: A ${format} field${desc}. Current value: ${this.formatForDisplay()}`;
-  }
-
   public serializeForSharePoint(): string | null {
     return this.value?.toISOString() ?? null;
   }

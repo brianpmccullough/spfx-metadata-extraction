@@ -26,10 +26,6 @@ export class UnsupportedField extends FieldBase {
     return `[${this.originalType}]`;
   }
 
-  public generateLlmPrompt(): string {
-    return `"${this.title}": Unsupported field type (${this.originalType}). This field cannot be extracted.`;
-  }
-
   public serializeForSharePoint(): null {
     // Unsupported fields should not be written back
     return null;

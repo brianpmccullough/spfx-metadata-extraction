@@ -44,29 +44,6 @@ describe('TaxonomyField', () => {
     });
   });
 
-  describe('generateLlmPrompt', () => {
-    it('includes valid terms', () => {
-      const field = makeField({ termGuid: 'guid-1', label: 'Finance' });
-      const prompt = field.generateLlmPrompt();
-      expect(prompt).toContain('Valid terms: ["Finance", "HR", "IT"]');
-    });
-
-    it('describes as managed metadata field', () => {
-      const field = makeField(null);
-      expect(field.generateLlmPrompt()).toContain('managed metadata field');
-    });
-
-    it('includes "(required)" when field is required', () => {
-      const field = makeField(null, { isRequired: true });
-      expect(field.generateLlmPrompt()).toContain('(required)');
-    });
-
-    it('includes current value label', () => {
-      const field = makeField({ termGuid: 'guid-3', label: 'IT' });
-      expect(field.generateLlmPrompt()).toContain('Current value: IT');
-    });
-  });
-
   describe('serializeForSharePoint', () => {
     it('returns SharePoint taxonomy format with metadata', () => {
       const field = makeField({ termGuid: 'guid-1', label: 'Finance', wssId: 42 });
@@ -139,27 +116,6 @@ describe('TaxonomyMultiField', () => {
     it('returns "(empty)" when value is empty array', () => {
       const field = makeField([]);
       expect(field.formatForDisplay()).toBe('(empty)');
-    });
-  });
-
-  describe('generateLlmPrompt', () => {
-    it('includes valid terms', () => {
-      const field = makeField(null);
-      const prompt = field.generateLlmPrompt();
-      expect(prompt).toContain('Valid terms: ["Policy", "Procedure", "Guideline"]');
-    });
-
-    it('describes as multi-value managed metadata field', () => {
-      const field = makeField(null);
-      expect(field.generateLlmPrompt()).toContain('multi-value managed metadata field');
-    });
-
-    it('includes current values', () => {
-      const field = makeField([
-        { termGuid: 'guid-1', label: 'Policy' },
-        { termGuid: 'guid-3', label: 'Guideline' },
-      ]);
-      expect(field.generateLlmPrompt()).toContain('Current value: Policy, Guideline');
     });
   });
 

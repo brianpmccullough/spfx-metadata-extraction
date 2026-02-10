@@ -38,29 +38,6 @@ describe('ChoiceField', () => {
     });
   });
 
-  describe('generateLlmPrompt', () => {
-    it('includes valid choices', () => {
-      const field = makeField('Draft');
-      const prompt = field.generateLlmPrompt();
-      expect(prompt).toContain('Valid choices: ["Draft", "Review", "Final"]');
-    });
-
-    it('includes "(required)" when field is required', () => {
-      const field = makeField('Draft', { isRequired: true });
-      expect(field.generateLlmPrompt()).toContain('(required)');
-    });
-
-    it('describes as single-choice field', () => {
-      const field = makeField('Draft');
-      expect(field.generateLlmPrompt()).toContain('single-choice field');
-    });
-
-    it('includes current value', () => {
-      const field = makeField('Review');
-      expect(field.generateLlmPrompt()).toContain('Current value: Review');
-    });
-  });
-
   describe('serializeForSharePoint', () => {
     it('returns the value as-is', () => {
       const field = makeField('Final');
@@ -118,24 +95,6 @@ describe('MultiChoiceField', () => {
     it('returns single value without comma', () => {
       const field = makeField(['Green']);
       expect(field.formatForDisplay()).toBe('Green');
-    });
-  });
-
-  describe('generateLlmPrompt', () => {
-    it('includes valid choices', () => {
-      const field = makeField(['Red']);
-      const prompt = field.generateLlmPrompt();
-      expect(prompt).toContain('Valid choices: ["Red", "Green", "Blue", "Yellow"]');
-    });
-
-    it('describes as multi-choice field', () => {
-      const field = makeField(['Red']);
-      expect(field.generateLlmPrompt()).toContain('multi-choice field');
-    });
-
-    it('includes current values', () => {
-      const field = makeField(['Red', 'Blue']);
-      expect(field.generateLlmPrompt()).toContain('Current value: Red, Blue');
     });
   });
 

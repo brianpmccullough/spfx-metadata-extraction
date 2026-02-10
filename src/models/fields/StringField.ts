@@ -22,12 +22,6 @@ export class StringField extends FieldBase {
     return this.value ?? '(empty)';
   }
 
-  public generateLlmPrompt(): string {
-    const required = this.isRequired ? ' (required)' : '';
-    const desc = this.description ? ` - ${this.description}` : '';
-    return `"${this.title}"${required}: A text field${desc}. Current value: ${this.formatForDisplay()}`;
-  }
-
   public serializeForSharePoint(): string | null {
     return this.value;
   }

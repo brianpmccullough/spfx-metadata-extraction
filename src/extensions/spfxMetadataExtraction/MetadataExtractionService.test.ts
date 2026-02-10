@@ -66,6 +66,77 @@ function makeMockTaxonomyService(): ITaxonomyService {
 }
 
 describe('MetadataExtractionService', () => {
+  describe('applyFieldValues', () => {
+    it('constructs the correct ValidateUpdateListItem URL', async () => {
+      const spoClient = makeMockSPOClient();
+      const service = new MetadataExtractionService(spoClient, makeMockTaxonomyService());
+      const docContext = makeMockDocumentContext();
+
+      await service.applyFieldValues(docContext, [
+        { internalName: 'Title', value: 'New Title' },
+      ]);
+
+      expect(spoClient.post).toHaveBeenCalledWith(
+        "https://contoso.sharepoint.com/sites/TestSite/_api/web/lists(guid'list-guid-9012')/items(42)/ValidateUpdateListItem()",
+        expect.anything()
+      );
+    });
+
+    it('maps fields to formValues with FieldName and FieldValue', async () => {
+      const spoClient = makeMockSPOClient();
+      const service = new MetadataExtractionService(spoClient, makeMockTaxonomyService());
+
+      await service.applyFieldValues(makeMockDocumentContext(), [
+        { internalName: 'Status', value: 'Draft' },
+        { internalName: 'Count', value: 42 },
+        { internalName: 'Active', value: true },
+      ]);
+
+      expect(spoClient.post).toHaveBeenCalledWith(
+        expect.any(String),
+        {
+          formValues: [
+            { FieldName: 'Status', FieldValue: 'Draft' },
+            { FieldName: 'Count', FieldValue: '42' },
+            { FieldName: 'Active', FieldValue: 'true' },
+          ],
+        }
+      );
+    });
+
+    it('handles null field values by converting to string "null"', async () => {
+      const spoClient = makeMockSPOClient();
+      const service = new MetadataExtractionService(spoClient, makeMockTaxonomyService());
+
+      await service.applyFieldValues(makeMockDocumentContext(), [
+        { internalName: 'Notes', value: null },
+      ]);
+
+      expect(spoClient.post).toHaveBeenCalledWith(
+        expect.any(String),
+        {
+          formValues: [
+            { FieldName: 'Notes', FieldValue: 'null' },
+          ],
+        }
+      );
+    });
+
+    it('propagates errors from the SPO client post', async () => {
+      const spoClient: ISharePointRestClient = {
+        get: jest.fn(),
+        post: jest.fn().mockRejectedValue(new Error('HTTP 403: Forbidden')),
+      };
+      const service = new MetadataExtractionService(spoClient, makeMockTaxonomyService());
+
+      await expect(
+        service.applyFieldValues(makeMockDocumentContext(), [
+          { internalName: 'Title', value: 'Test' },
+        ])
+      ).rejects.toThrow('HTTP 403: Forbidden');
+    });
+  });
+
   describe('loadFields', () => {
     it('constructs the correct REST URL for field schemas', async () => {
       const spoClient = makeMockSPOClient({

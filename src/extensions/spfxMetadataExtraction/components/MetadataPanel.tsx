@@ -69,22 +69,28 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
 
   const handleExtractionTypeChange = React.useCallback(
     (index: number, newType: MetadataExtractionFieldType): void => {
-      setExtractionFields((prev) => {
-        const updated = [...prev];
-        updated[index].extractionType = newType;
-        return updated;
-      });
+      setExtractionFields((prev) =>
+        prev.map((ef, i) => {
+          if (i !== index) return ef;
+          const cloned = ef.clone();
+          cloned.extractionType = newType;
+          return cloned;
+        })
+      );
     },
     []
   );
 
   const handleDescriptionChange = React.useCallback(
     (index: number, newDescription: string): void => {
-      setExtractionFields((prev) => {
-        const updated = [...prev];
-        updated[index].description = newDescription;
-        return updated;
-      });
+      setExtractionFields((prev) =>
+        prev.map((ef, i) => {
+          if (i !== index) return ef;
+          const cloned = ef.clone();
+          cloned.description = newDescription;
+          return cloned;
+        })
+      );
     },
     []
   );
@@ -97,9 +103,10 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
     // Clear previous extraction results
     setExtractionFields((prev) =>
       prev.map((ef) => {
-        ef.extractedValue = null;
-        ef.confidence = null;
-        return ef;
+        const cloned = ef.clone();
+        cloned.extractedValue = null;
+        cloned.confidence = null;
+        return cloned;
       })
     );
 
@@ -117,8 +124,10 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
         const updated = prev.map((ef) => {
           const result = response.results.find((r) => r.fieldName === ef.field.title);
           if (result) {
-            ef.extractedValue = result.value;
-            ef.confidence = result.confidence;
+            const cloned = ef.clone();
+            cloned.extractedValue = result.value;
+            cloned.confidence = result.confidence;
+            return cloned;
           }
           return ef;
         });

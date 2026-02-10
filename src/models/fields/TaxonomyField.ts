@@ -41,13 +41,6 @@ export class TaxonomyField extends FieldBase {
     return this.value?.label ?? '(empty)';
   }
 
-  public generateLlmPrompt(): string {
-    const required = this.isRequired ? ' (required)' : '';
-    const desc = this.description ? ` - ${this.description}` : '';
-    const validTerms = `Valid terms: [${this.terms.map((t) => `"${t.label}"`).join(', ')}]`;
-    return `"${this.title}"${required}: A managed metadata field${desc}. ${validTerms}. Current value: ${this.formatForDisplay()}`;
-  }
-
   public serializeForSharePoint(): object | null {
     if (!this.value) {
       return null;
@@ -86,13 +79,6 @@ export class TaxonomyMultiField extends FieldBase {
       return '(empty)';
     }
     return this.value.map((v) => v.label).join(', ');
-  }
-
-  public generateLlmPrompt(): string {
-    const required = this.isRequired ? ' (required)' : '';
-    const desc = this.description ? ` - ${this.description}` : '';
-    const validTerms = `Valid terms: [${this.terms.map((t) => `"${t.label}"`).join(', ')}]`;
-    return `"${this.title}"${required}: A multi-value managed metadata field (select one or more)${desc}. ${validTerms}. Current value: ${this.formatForDisplay()}`;
   }
 
   public serializeForSharePoint(): object[] | null {

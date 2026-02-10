@@ -63,7 +63,7 @@ export default class SpfxMetadataExtractionCommandSet extends BaseListViewComman
           return;
         }
 
-        const dialog = new MetadataDialog(this._metadataExtractionService, context.documentContext!, this._llmExtractionService, this._sharePointRestClient);
+        const dialog = new MetadataDialog(this._metadataExtractionService, context.documentContext!, this._llmExtractionService);
         dialog.show().catch((error) => {
           Log.error(LOG_SOURCE, error);
         });

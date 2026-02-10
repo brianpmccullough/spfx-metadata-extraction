@@ -48,23 +48,6 @@ describe('UnsupportedField', () => {
     });
   });
 
-  describe('generateLlmPrompt', () => {
-    it('indicates field cannot be extracted', () => {
-      const field = makeField(null, 'Lookup');
-      expect(field.generateLlmPrompt()).toContain('cannot be extracted');
-    });
-
-    it('includes the original type', () => {
-      const field = makeField(null, 'User');
-      expect(field.generateLlmPrompt()).toContain('Unsupported field type (User)');
-    });
-
-    it('includes field title', () => {
-      const field = makeField(null, 'Lookup');
-      expect(field.generateLlmPrompt()).toContain('"Related Item"');
-    });
-  });
-
   describe('serializeForSharePoint', () => {
     it('always returns null', () => {
       const field = makeField({ Id: 1, Title: 'Item' }, 'Lookup');

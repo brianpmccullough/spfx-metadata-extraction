@@ -24,12 +24,6 @@ export class BooleanField extends FieldBase {
     return this.value ? 'Yes' : 'No';
   }
 
-  public generateLlmPrompt(): string {
-    const required = this.isRequired ? ' (required)' : '';
-    const desc = this.description ? ` - ${this.description}` : '';
-    return `"${this.title}"${required}: A yes/no field${desc}. Current value: ${this.formatForDisplay()}`;
-  }
-
   public serializeForSharePoint(): boolean | null {
     return this.value;
   }

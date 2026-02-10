@@ -41,6 +41,21 @@ export class MetadataExtractionService implements IMetadataExtractionService {
     this._fieldFactory = new FieldFactory(taxService);
   }
 
+  public async applyFieldValues(
+    documentContext: IDocumentContext,
+    fields: Array<{ internalName: string; value: string | number | boolean | null }>
+  ): Promise<void> {
+    const { webUrl, listId, itemId } = documentContext;
+    const url = `${webUrl}/_api/web/lists(guid'${listId}')/items(${itemId})/ValidateUpdateListItem()`;
+
+    const formValues = fields.map((f) => ({
+      FieldName: f.internalName,
+      FieldValue: String(f.value),
+    }));
+
+    await this._spoClient.post(url, { formValues });
+  }
+
   public async loadFields(documentContext: IDocumentContext): Promise<FieldBase[]> {
     const schemas = await this.getFieldSchemas(documentContext);
     const values = await this.getFieldValues(documentContext, schemas);

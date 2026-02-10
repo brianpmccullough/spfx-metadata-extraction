@@ -45,33 +45,6 @@ describe('NumericField', () => {
     });
   });
 
-  describe('generateLlmPrompt', () => {
-    it('includes field title', () => {
-      const field = makeField(100);
-      expect(field.generateLlmPrompt()).toContain('"Total Amount"');
-    });
-
-    it('describes as numeric field', () => {
-      const field = makeField(100);
-      expect(field.generateLlmPrompt()).toContain('numeric field');
-    });
-
-    it('includes "(required)" when field is required', () => {
-      const field = makeField(100, { isRequired: true });
-      expect(field.generateLlmPrompt()).toContain('(required)');
-    });
-
-    it('includes description when provided', () => {
-      const field = makeField(100, { description: 'The total cost' });
-      expect(field.generateLlmPrompt()).toContain('The total cost');
-    });
-
-    it('includes current value', () => {
-      const field = makeField(99.99);
-      expect(field.generateLlmPrompt()).toContain('Current value: 99.99');
-    });
-  });
-
   describe('serializeForSharePoint', () => {
     it('returns the value as-is', () => {
       const field = makeField(42.5);
