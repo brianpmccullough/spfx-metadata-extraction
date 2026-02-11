@@ -25,6 +25,10 @@ export interface ISharePointFieldSchema {
   DisplayFormat?: number;
   // Taxonomy fields
   TermSetId?: string;
+  // Text fields
+  MaxLength?: number;
+  // Note fields
+  UnlimitedLengthInDocumentLibrary?: boolean;
 }
 
 /**
@@ -59,6 +63,16 @@ export class FieldFactory implements IFieldFactory {
 
     switch (schema.TypeAsString) {
       case 'Text':
+        return new StringField(
+          baseArgs.id,
+          baseArgs.internalName,
+          baseArgs.title,
+          baseArgs.description,
+          baseArgs.isRequired,
+          value as string | null,
+          schema.MaxLength ?? 255
+        );
+
       case 'Note':
         return new StringField(
           baseArgs.id,
@@ -66,7 +80,8 @@ export class FieldFactory implements IFieldFactory {
           baseArgs.title,
           baseArgs.description,
           baseArgs.isRequired,
-          value as string | null
+          value as string | null,
+          schema.UnlimitedLengthInDocumentLibrary ? null : 255
         );
 
       case 'Choice':

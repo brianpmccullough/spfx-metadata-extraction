@@ -47,7 +47,6 @@ src/extensions/spfxMetadataExtraction/
 **Service boundaries:**
 
 - All SharePoint REST calls (reads and writes) must go through a service class (e.g., `MetadataExtractionService`). Dialogs and React components must never import or use `ISharePointRestClient` directly.
-- Do not add abstract methods to `FieldBase` unless they are called from production code. Prompt generation lives in `MetadataExtractionField.getExtractionHint()`, not on individual field subclasses.
 - Never mutate objects inside React state updaters. When updating a `MetadataExtractionField` in state, call `ef.clone()` before modifying properties, and return the clone.
 
 **Component ID:** `c2fbb0ac-b2e6-48ff-8b6a-af3065224b39`
@@ -66,3 +65,4 @@ SPFx components, generally, should feel like part of the SharePoint Online envir
 ## Deployment
 
 Production build produces `sharepoint/solution/spfx-metadata-extraction.sppkg`. This package is uploaded to the SharePoint App Catalog. The extension deploys via CustomAction defined in `sharepoint/assets/elements.xml`, targeting document libraries (Registration ID 101).
+

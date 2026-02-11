@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- LLM service JSON contract uses null for unextracted values */
 import type { IFieldSchema, ExtractionConfidence } from '../models/extraction';
 
 /**

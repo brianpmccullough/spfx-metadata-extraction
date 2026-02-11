@@ -59,4 +59,18 @@ describe('UnsupportedField', () => {
       expect(field.serializeForSharePoint()).toBeNull();
     });
   });
+
+  describe('isValidExtractedValue', () => {
+    it('returns false for any value', () => {
+      const field = makeField('some value', 'Lookup');
+      expect(field.isValidExtractedValue('anything')).toBe(false);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns the value as-is', () => {
+      const field = makeField('some value', 'Lookup');
+      expect(field.resolveValueForApply('anything')).toBe('anything');
+    });
+  });
 });

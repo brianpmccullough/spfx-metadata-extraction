@@ -37,4 +37,10 @@ export abstract class FieldBase {
 
   /** Serialize the value for SharePoint REST API write-back. */
   public abstract serializeForSharePoint(): unknown;
+
+  /** Whether an LLM-extracted value is valid for this field's constraints. */
+  public abstract isValidExtractedValue(value: string | number | boolean): boolean;
+
+  /** Format an LLM-extracted value for ValidateUpdateListItem write-back. */
+  public abstract resolveValueForApply(value: string | number | boolean): string | number | boolean;
 }

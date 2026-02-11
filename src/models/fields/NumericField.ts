@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- SharePoint REST API uses null for empty field values */
 import { FieldBase, FieldKind } from './FieldBase';
 
 /**
@@ -27,5 +28,13 @@ export class NumericField extends FieldBase {
 
   public serializeForSharePoint(): number | null {
     return this.value;
+  }
+
+  public isValidExtractedValue(_value: string | number | boolean): boolean {
+    return true;
+  }
+
+  public resolveValueForApply(value: string | number | boolean): string | number | boolean {
+    return value;
   }
 }

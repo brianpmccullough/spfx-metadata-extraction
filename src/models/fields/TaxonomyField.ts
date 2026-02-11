@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- SharePoint REST API uses null for empty field values */
 import { FieldBase, FieldKind } from './FieldBase';
 
 /**
@@ -51,6 +52,22 @@ export class TaxonomyField extends FieldBase {
       WssId: this.value.wssId ?? -1,
     };
   }
+
+  public isValidExtractedValue(value: string | number | boolean): boolean {
+    const label = String(value).trim();
+    return this.terms.some((t) => t.label.toLowerCase() === label.toLowerCase());
+  }
+
+  public resolveValueForApply(value: string | number | boolean): string {
+    const label = String(value).trim();
+    const match = this.terms.find(
+      (t) => t.label.toLowerCase() === label.toLowerCase()
+    );
+    if (match) {
+      return `${match.label}|${match.termGuid}`;
+    }
+    return label;
+  }
 }
 
 /**
@@ -89,5 +106,32 @@ export class TaxonomyMultiField extends FieldBase {
       TermGuid: v.termGuid,
       WssId: v.wssId ?? -1,
     }));
+  }
+
+  public isValidExtractedValue(value: string | number | boolean): boolean {
+    const labels = String(value)
+      .split(',')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    return labels.every((label) =>
+      this.terms.some((t) => t.label.toLowerCase() === label.toLowerCase())
+    );
+  }
+
+  public resolveValueForApply(value: string | number | boolean): string {
+    const labels = String(value)
+      .split(',')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    const resolved = labels.map((label) => {
+      const match = this.terms.find(
+        (t) => t.label.toLowerCase() === label.toLowerCase()
+      );
+      if (match) {
+        return `${match.label}|${match.termGuid}`;
+      }
+      return label;
+    });
+    return resolved.join(';#');
   }
 }

@@ -108,6 +108,42 @@ describe('MetadataExtractionService', () => {
         ])
       ).rejects.toThrow('HTTP 403: Forbidden');
     });
+
+    it('throws when response contains field-level validation errors', async () => {
+      const spoClient = makeMockSPOClient({
+        postResponses: [{
+          value: [
+            { ErrorCode: 0, ErrorMessage: null, FieldName: 'Summary', FieldValue: 'ok', HasException: false, ItemId: 1 },
+            { ErrorCode: -2146232832, ErrorMessage: 'This field can have no more than 255 characters.', FieldName: 'Narrative', FieldValue: 'too long...', HasException: true, ItemId: 1 },
+          ],
+        }],
+      });
+      const service = new MetadataExtractionService(spoClient, makeMockTaxonomyService());
+
+      await expect(
+        service.applyFieldValues(makeMockDocumentContext(), [
+          { internalName: 'Summary', value: 'ok' },
+          { internalName: 'Narrative', value: 'too long...' },
+        ])
+      ).rejects.toThrow('Narrative: This field can have no more than 255 characters.');
+    });
+
+    it('resolves when all fields succeed', async () => {
+      const spoClient = makeMockSPOClient({
+        postResponses: [{
+          value: [
+            { ErrorCode: 0, ErrorMessage: null, FieldName: 'Title', FieldValue: 'New', HasException: false, ItemId: 1 },
+          ],
+        }],
+      });
+      const service = new MetadataExtractionService(spoClient, makeMockTaxonomyService());
+
+      await expect(
+        service.applyFieldValues(makeMockDocumentContext(), [
+          { internalName: 'Title', value: 'New' },
+        ])
+      ).resolves.toBeUndefined();
+    });
   });
 
   describe('loadFields', () => {
@@ -138,6 +174,8 @@ describe('MetadataExtractionService', () => {
       expect(url).toContain('Choices');
       expect(url).toContain('DisplayFormat');
       expect(url).toContain('TermSetId');
+      expect(url).toContain('MaxLength');
+      expect(url).toContain('UnlimitedLengthInDocumentLibrary');
     });
 
     it('uses RenderListDataAsStream to get field values', async () => {

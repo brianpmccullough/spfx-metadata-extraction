@@ -49,6 +49,30 @@ describe('ChoiceField', () => {
       expect(field.serializeForSharePoint()).toBeNull();
     });
   });
+
+  describe('isValidExtractedValue', () => {
+    it('returns true for a matching choice', () => {
+      const field = makeField('Draft');
+      expect(field.isValidExtractedValue('Draft')).toBe(true);
+    });
+
+    it('matches case-insensitively', () => {
+      const field = makeField('Draft');
+      expect(field.isValidExtractedValue('draft')).toBe(true);
+    });
+
+    it('returns false for a non-matching value', () => {
+      const field = makeField('Draft');
+      expect(field.isValidExtractedValue('Unknown')).toBe(false);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns the value as-is', () => {
+      const field = makeField('Draft');
+      expect(field.resolveValueForApply('Final')).toBe('Final');
+    });
+  });
 });
 
 describe('MultiChoiceField', () => {
@@ -117,6 +141,30 @@ describe('MultiChoiceField', () => {
     it('handles single value', () => {
       const field = makeField(['Green']);
       expect(field.serializeForSharePoint()).toBe(';#Green;#');
+    });
+  });
+
+  describe('isValidExtractedValue', () => {
+    it('returns true when all values match choices', () => {
+      const field = makeField(['Red']);
+      expect(field.isValidExtractedValue('Red, Blue')).toBe(true);
+    });
+
+    it('matches case-insensitively', () => {
+      const field = makeField(['Red']);
+      expect(field.isValidExtractedValue('red, blue')).toBe(true);
+    });
+
+    it('returns false when any value does not match', () => {
+      const field = makeField(['Red']);
+      expect(field.isValidExtractedValue('Red, Purple')).toBe(false);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns the value as-is', () => {
+      const field = makeField(['Red']);
+      expect(field.resolveValueForApply('Red, Blue')).toBe('Red, Blue');
     });
   });
 });

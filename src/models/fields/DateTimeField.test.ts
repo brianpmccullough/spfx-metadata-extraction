@@ -68,4 +68,18 @@ describe('DateTimeField', () => {
       expect(field.includesTime).toBe(false);
     });
   });
+
+  describe('isValidExtractedValue', () => {
+    it('returns true for any value', () => {
+      const field = makeField(new Date(), false);
+      expect(field.isValidExtractedValue('2025-01-15')).toBe(true);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns the value as-is', () => {
+      const field = makeField(new Date(), false);
+      expect(field.resolveValueForApply('2025-01-15')).toBe('2025-01-15');
+    });
+  });
 });

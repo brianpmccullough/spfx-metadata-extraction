@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- SharePoint REST API uses null for empty field values */
 import { FieldBase, FieldKind } from './FieldBase';
 
 /**
@@ -24,6 +25,15 @@ export class ChoiceField extends FieldBase {
 
   public serializeForSharePoint(): string | null {
     return this.value;
+  }
+
+  public isValidExtractedValue(value: string | number | boolean): boolean {
+    const label = String(value).trim();
+    return this.choices.some((c) => c.toLowerCase() === label.toLowerCase());
+  }
+
+  public resolveValueForApply(value: string | number | boolean): string | number | boolean {
+    return value;
   }
 }
 
@@ -58,5 +68,19 @@ export class MultiChoiceField extends FieldBase {
     }
     // SharePoint expects ";#value1;#value2;#" format for multi-choice
     return `;#${this.value.join(';#')};#`;
+  }
+
+  public isValidExtractedValue(value: string | number | boolean): boolean {
+    const labels = String(value)
+      .split(',')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    return labels.every((label) =>
+      this.choices.some((c) => c.toLowerCase() === label.toLowerCase())
+    );
+  }
+
+  public resolveValueForApply(value: string | number | boolean): string | number | boolean {
+    return value;
   }
 }

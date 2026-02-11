@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- SharePoint REST API uses null to clear field values */
 import type { IDocumentContext } from '../models/IDocumentContext';
 import type { ISharePointRestClient, ISharePointRestCollectionResponse } from '../clients';
 import type { IMetadataExtractionService } from './IMetadataExtractionService';
@@ -11,6 +12,16 @@ import { FieldBase, FieldFactory, ISharePointFieldSchema, type ITaxonomyValue } 
  */
 interface ISharePointFieldResponse extends ISharePointFieldSchema {
   Hidden: boolean;
+}
+
+/** Per-field result returned by the ValidateUpdateListItem API. */
+interface IValidateUpdateListItemResult {
+  ErrorCode: number;
+  ErrorMessage: string | null;
+  FieldName: string;
+  FieldValue: string;
+  HasException: boolean;
+  ItemId: number;
 }
 
 export class MetadataExtractionService implements IMetadataExtractionService {
@@ -52,7 +63,17 @@ export class MetadataExtractionService implements IMetadataExtractionService {
       FieldValue: String(f.value),
     }));
 
-    await this._spoClient.post(url, { formValues });
+    const response = await this._spoClient.post<
+      ISharePointRestCollectionResponse<IValidateUpdateListItemResult>
+    >(url, { formValues });
+
+    const failures = (response.value ?? []).filter((r) => r.HasException);
+    if (failures.length > 0) {
+      const details = failures
+        .map((f) => `${f.FieldName}: ${f.ErrorMessage}`)
+        .join('; ');
+      throw new Error(details);
+    }
   }
 
   public async loadFields(documentContext: IDocumentContext): Promise<FieldBase[]> {
@@ -88,6 +109,8 @@ export class MetadataExtractionService implements IMetadataExtractionService {
       'Choices',
       'DisplayFormat',
       'TermSetId',
+      'MaxLength',
+      'UnlimitedLengthInDocumentLibrary',
     ].join(',');
 
     const url = `${documentContext.webUrl}/_api/web/lists(guid'${documentContext.listId}')/contenttypes('${documentContext.contentTypeId}')/fields?$filter=Hidden eq false&$select=${selectFields}`;

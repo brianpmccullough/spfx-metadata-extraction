@@ -56,4 +56,18 @@ describe('BooleanField', () => {
       expect(field.serializeForSharePoint()).toBeNull();
     });
   });
+
+  describe('isValidExtractedValue', () => {
+    it('returns true for any value', () => {
+      const field = makeField(true);
+      expect(field.isValidExtractedValue(false)).toBe(true);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns the value as-is', () => {
+      const field = makeField(true);
+      expect(field.resolveValueForApply(false)).toBe(false);
+    });
+  });
 });

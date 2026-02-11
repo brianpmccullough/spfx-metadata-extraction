@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- Returns null to signal unsupported fields must not be written back */
 import { FieldBase, FieldKind } from './FieldBase';
 
 /**
@@ -29,5 +30,13 @@ export class UnsupportedField extends FieldBase {
   public serializeForSharePoint(): null {
     // Unsupported fields should not be written back
     return null;
+  }
+
+  public isValidExtractedValue(_value: string | number | boolean): boolean {
+    return false;
+  }
+
+  public resolveValueForApply(value: string | number | boolean): string | number | boolean {
+    return value;
   }
 }

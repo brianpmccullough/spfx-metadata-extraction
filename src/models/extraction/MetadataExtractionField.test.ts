@@ -1,5 +1,5 @@
 import { MetadataExtractionField, MetadataExtractionFieldType } from './MetadataExtractionField';
-import { StringField, NumericField, BooleanField, ChoiceField, DateTimeField } from '../fields';
+import { StringField, NumericField, BooleanField, ChoiceField, DateTimeField, TaxonomyField, TaxonomyMultiField } from '../fields';
 
 describe('MetadataExtractionField', () => {
   describe('constructor', () => {
@@ -133,6 +133,128 @@ describe('MetadataExtractionField', () => {
       extractionField.description = 'Updated';
 
       expect(field.description).toBe('Original');
+    });
+  });
+
+  describe('canApply', () => {
+    it('returns false when extractedValue is null', () => {
+      const field = new StringField('id1', 'Title', 'Title', '', false, 'val');
+      const ef = new MetadataExtractionField(field);
+      ef.confidence = 'green';
+
+      expect(ef.canApply()).toBe(false);
+    });
+
+    it('returns false when confidence is null', () => {
+      const field = new StringField('id1', 'Title', 'Title', '', false, 'val');
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'something';
+
+      expect(ef.canApply()).toBe(false);
+    });
+
+    it('returns false when confidence is red', () => {
+      const field = new StringField('id1', 'Title', 'Title', '', false, 'val');
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'something';
+      ef.confidence = 'red';
+
+      expect(ef.canApply()).toBe(false);
+    });
+
+    it('returns true for green confidence with valid value', () => {
+      const field = new StringField('id1', 'Title', 'Title', '', false, 'val');
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'something';
+      ef.confidence = 'green';
+
+      expect(ef.canApply()).toBe(true);
+    });
+
+    it('returns true for yellow confidence with valid value', () => {
+      const field = new StringField('id1', 'Title', 'Title', '', false, 'val');
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'something';
+      ef.confidence = 'yellow';
+
+      expect(ef.canApply()).toBe(true);
+    });
+
+    it('returns false when field rejects the extracted value', () => {
+      const field = new TaxonomyField('id1', 'Dept', 'Department', '', false, null, 'ts1', [
+        { termGuid: 'g1', label: 'HR' },
+      ]);
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'Unknown Department';
+      ef.confidence = 'green';
+
+      expect(ef.canApply()).toBe(false);
+    });
+
+    it('returns true when taxonomy label matches', () => {
+      const field = new TaxonomyField('id1', 'Dept', 'Department', '', false, null, 'ts1', [
+        { termGuid: 'g1', label: 'HR' },
+      ]);
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'HR';
+      ef.confidence = 'green';
+
+      expect(ef.canApply()).toBe(true);
+    });
+
+    it('returns false for choice field with non-matching value', () => {
+      const field = new ChoiceField('id1', 'Status', 'Status', '', false, 'Draft', ['Draft', 'Final']);
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'Unknown';
+      ef.confidence = 'green';
+
+      expect(ef.canApply()).toBe(false);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns null when extractedValue is null', () => {
+      const field = new StringField('id1', 'Title', 'Title', '', false, 'val');
+      const ef = new MetadataExtractionField(field);
+
+      expect(ef.resolveValueForApply()).toBeNull();
+    });
+
+    it('delegates to field for taxonomy resolution', () => {
+      const field = new TaxonomyField('id1', 'Dept', 'Department', '', false, null, 'ts1', [
+        { termGuid: 'guid-abc-123', label: 'Executive Management' },
+      ]);
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'Executive Management';
+
+      expect(ef.resolveValueForApply()).toBe('Executive Management|guid-abc-123');
+    });
+
+    it('delegates to field for multi-taxonomy resolution', () => {
+      const field = new TaxonomyMultiField('id1', 'Tags', 'Tags', '', false, null, 'ts1', [
+        { termGuid: 'guid-1', label: 'Finance' },
+        { termGuid: 'guid-2', label: 'Legal' },
+      ]);
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'Finance, Legal';
+
+      expect(ef.resolveValueForApply()).toBe('Finance|guid-1;#Legal|guid-2');
+    });
+
+    it('passes through string values for non-taxonomy fields', () => {
+      const field = new StringField('id1', 'Title', 'Title', '', false, 'val');
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 'Some Title';
+
+      expect(ef.resolveValueForApply()).toBe('Some Title');
+    });
+
+    it('passes through numeric values', () => {
+      const field = new NumericField('id1', 'Count', 'Count', '', false, 0);
+      const ef = new MetadataExtractionField(field);
+      ef.extractedValue = 42;
+
+      expect(ef.resolveValueForApply()).toBe(42);
     });
   });
 });

@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- SharePoint REST API uses null for empty field values */
 import { FieldBase, FieldKind } from './FieldBase';
 
 /**
@@ -30,5 +31,13 @@ export class DateTimeField extends FieldBase {
 
   public serializeForSharePoint(): string | null {
     return this.value?.toISOString() ?? null;
+  }
+
+  public isValidExtractedValue(_value: string | number | boolean): boolean {
+    return true;
+  }
+
+  public resolveValueForApply(value: string | number | boolean): string | number | boolean {
+    return value;
   }
 }

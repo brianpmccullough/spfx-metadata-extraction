@@ -61,4 +61,18 @@ describe('NumericField', () => {
       expect(field.serializeForSharePoint()).toBe(0);
     });
   });
+
+  describe('isValidExtractedValue', () => {
+    it('returns true for any value', () => {
+      const field = makeField(42);
+      expect(field.isValidExtractedValue(100)).toBe(true);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns the value as-is', () => {
+      const field = makeField(42);
+      expect(field.resolveValueForApply(100)).toBe(100);
+    });
+  });
 });

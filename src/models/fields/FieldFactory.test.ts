@@ -63,6 +63,51 @@ describe('FieldFactory', () => {
 
       expect(field.value).toBeNull();
     });
+
+    it('sets maxLength from schema MaxLength for Text fields', async () => {
+      const factory = new FieldFactory(makeMockTaxonomyService());
+      const schema = makeBaseSchema('Text', { MaxLength: 100 });
+
+      const field = await factory.createField(schema, 'value', siteUrl);
+
+      expect((field as StringField).maxLength).toBe(100);
+    });
+
+    it('defaults maxLength to 255 for Text fields when MaxLength is not in schema', async () => {
+      const factory = new FieldFactory(makeMockTaxonomyService());
+      const schema = makeBaseSchema('Text');
+
+      const field = await factory.createField(schema, 'value', siteUrl);
+
+      expect((field as StringField).maxLength).toBe(255);
+    });
+
+    it('sets maxLength to null for Note fields when UnlimitedLengthInDocumentLibrary is true', async () => {
+      const factory = new FieldFactory(makeMockTaxonomyService());
+      const schema = makeBaseSchema('Note', { UnlimitedLengthInDocumentLibrary: true });
+
+      const field = await factory.createField(schema, 'value', siteUrl);
+
+      expect((field as StringField).maxLength).toBeNull();
+    });
+
+    it('sets maxLength to 255 for Note fields when UnlimitedLengthInDocumentLibrary is false', async () => {
+      const factory = new FieldFactory(makeMockTaxonomyService());
+      const schema = makeBaseSchema('Note', { UnlimitedLengthInDocumentLibrary: false });
+
+      const field = await factory.createField(schema, 'value', siteUrl);
+
+      expect((field as StringField).maxLength).toBe(255);
+    });
+
+    it('sets maxLength to 255 for Note fields when UnlimitedLengthInDocumentLibrary is missing', async () => {
+      const factory = new FieldFactory(makeMockTaxonomyService());
+      const schema = makeBaseSchema('Note');
+
+      const field = await factory.createField(schema, 'value', siteUrl);
+
+      expect((field as StringField).maxLength).toBe(255);
+    });
   });
 
   describe('Choice fields', () => {

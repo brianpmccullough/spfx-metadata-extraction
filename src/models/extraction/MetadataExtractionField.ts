@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- Null represents "not yet extracted" sentinel, consistent with SharePoint null conventions */
 import type { FieldBase } from '../fields';
 import type { IDocumentContext } from '../IDocumentContext';
 import {
@@ -114,6 +115,29 @@ export class MetadataExtractionField {
       default:
         return '';
     }
+  }
+
+  /**
+   * Whether this field's extracted value can be applied.
+   * Checks that extraction produced a result, confidence is not red,
+   * and the extracted value is valid for the field's constraints.
+   */
+  public canApply(): boolean {
+    if (this.extractedValue === null || this.confidence === null || this.confidence === 'red') {
+      return false;
+    }
+    return this.field.isValidExtractedValue(this.extractedValue);
+  }
+
+  /**
+   * Returns the extracted value formatted for ValidateUpdateListItem.
+   * Delegates to the underlying field for type-specific formatting.
+   */
+  public resolveValueForApply(): string | number | boolean | null {
+    if (this.extractedValue === null) {
+      return null;
+    }
+    return this.field.resolveValueForApply(this.extractedValue);
   }
 
   /**

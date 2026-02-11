@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- Field values flow to SharePoint REST API which uses null */
 import * as React from 'react';
 import {
   DefaultButton,
@@ -41,6 +42,7 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
   const [applyChecked, setApplyChecked] = React.useState<Set<string>>(new Set());
   const [loadError, setLoadError] = React.useState<string>();
   const [error, setError] = React.useState<string>();
+  const [applySuccess, setApplySuccess] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -96,6 +98,7 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
   const handleExtract = React.useCallback(async (): Promise<void> => {
     setIsExtracting(true);
     setError(undefined);
+    setApplySuccess(false);
     setApplyChecked(new Set());
 
     // Clear previous extraction results
@@ -129,10 +132,10 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
           return ef;
         });
 
-        // Auto-check green confidence fields
+        // Auto-check green confidence fields that have valid values
         const autoChecked = new Set<string>();
         for (const ef of updated) {
-          if (ef.confidence === 'green') {
+          if (ef.confidence === 'green' && ef.canApply()) {
             autoChecked.add(ef.field.id);
           }
         }
@@ -167,16 +170,18 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
   const handleApply = React.useCallback(async (): Promise<void> => {
     setIsApplying(true);
     setError(undefined);
+    setApplySuccess(false);
 
     try {
       const fieldsToApply = extractionFields
         .filter((ef) => applyChecked.has(ef.field.id))
         .map((ef) => ({
           internalName: ef.field.internalName,
-          value: ef.extractedValue,
+          value: ef.resolveValueForApply(),
         }));
 
       await onApply(fieldsToApply);
+      setApplySuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Apply failed');
     } finally {
@@ -225,6 +230,16 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
         </MessageBar>
       )}
 
+      {applySuccess && (
+        <MessageBar
+          messageBarType={MessageBarType.success}
+          onDismiss={() => setApplySuccess(false)}
+          style={{ marginBottom: 16, flexShrink: 0 }}
+        >
+          Document properties updated successfully.
+        </MessageBar>
+      )}
+
       <div style={{ flex: 1, overflow: 'auto', marginBottom: 16 }}>
         {extractionFields.length === 0 ? (
           <MessageBar messageBarType={MessageBarType.info}>
@@ -249,7 +264,7 @@ export const MetadataPanel: React.FC<IMetadataPanelProps> = ({
                 onDescriptionChange={(newDesc) => handleDescriptionChange(index, newDesc)}
                 applyChecked={applyChecked.has(extractionField.field.id)}
                 onApplyCheckedChange={(checked) => handleApplyCheckedChange(extractionField.field.id, checked)}
-                isApplyEnabled={hasExtracted && extractionField.confidence !== 'red' && extractionField.confidence !== null}
+                isApplyEnabled={hasExtracted && extractionField.canApply()}
               />
             ))}
           </>

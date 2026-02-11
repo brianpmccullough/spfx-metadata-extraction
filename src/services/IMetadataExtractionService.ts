@@ -1,3 +1,4 @@
+/* eslint-disable @rushstack/no-new-null -- SharePoint REST API uses null to clear field values */
 import type { IDocumentContext } from '../models/IDocumentContext';
 import type { FieldBase } from '../models/fields';
 

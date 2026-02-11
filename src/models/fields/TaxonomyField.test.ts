@@ -65,6 +65,40 @@ describe('TaxonomyField', () => {
       expect(field.serializeForSharePoint()).toBeNull();
     });
   });
+
+  describe('isValidExtractedValue', () => {
+    it('returns true for a matching term label', () => {
+      const field = makeField(null);
+      expect(field.isValidExtractedValue('Finance')).toBe(true);
+    });
+
+    it('matches case-insensitively', () => {
+      const field = makeField(null);
+      expect(field.isValidExtractedValue('finance')).toBe(true);
+    });
+
+    it('returns false for a non-matching label', () => {
+      const field = makeField(null);
+      expect(field.isValidExtractedValue('Unknown')).toBe(false);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns label|termGuid for a matching term', () => {
+      const field = makeField(null);
+      expect(field.resolveValueForApply('Finance')).toBe('Finance|guid-1');
+    });
+
+    it('uses canonical label casing', () => {
+      const field = makeField(null);
+      expect(field.resolveValueForApply('finance')).toBe('Finance|guid-1');
+    });
+
+    it('returns raw label when no match found', () => {
+      const field = makeField(null);
+      expect(field.resolveValueForApply('Unknown')).toBe('Unknown');
+    });
+  });
 });
 
 describe('TaxonomyMultiField', () => {
@@ -147,6 +181,40 @@ describe('TaxonomyMultiField', () => {
     it('returns null when value is empty array', () => {
       const field = makeField([]);
       expect(field.serializeForSharePoint()).toBeNull();
+    });
+  });
+
+  describe('isValidExtractedValue', () => {
+    it('returns true when all labels match terms', () => {
+      const field = makeField(null);
+      expect(field.isValidExtractedValue('Policy, Procedure')).toBe(true);
+    });
+
+    it('matches case-insensitively', () => {
+      const field = makeField(null);
+      expect(field.isValidExtractedValue('policy, procedure')).toBe(true);
+    });
+
+    it('returns false when any label does not match', () => {
+      const field = makeField(null);
+      expect(field.isValidExtractedValue('Policy, Unknown')).toBe(false);
+    });
+  });
+
+  describe('resolveValueForApply', () => {
+    it('returns label1|guid1;#label2|guid2 format', () => {
+      const field = makeField(null);
+      expect(field.resolveValueForApply('Policy, Procedure')).toBe('Policy|guid-1;#Procedure|guid-2');
+    });
+
+    it('uses canonical label casing', () => {
+      const field = makeField(null);
+      expect(field.resolveValueForApply('policy')).toBe('Policy|guid-1');
+    });
+
+    it('returns raw labels for unmatched terms', () => {
+      const field = makeField(null);
+      expect(field.resolveValueForApply('Policy, Unknown')).toBe('Policy|guid-1;#Unknown');
     });
   });
 });
